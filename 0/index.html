@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Creepy Ariana — Project 0</title>
+
+  <!-- y2k and horrorfonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Orbitron:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg0: #06030a;
+      --neon1:#ff1f8f;   
+      --neon2:#00ffd0;   
+      --neon3:#a3ff00;   
+      --blood:#b0002a;   
+      --ink:#e9e9ff;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--ink);
+      background:
+      /*apply gradients*/
+        radial-gradient(1200px 800px at 80% -10%, rgba(255,31,143,.20), transparent 60%),
+        radial-gradient(800px 500px at -20% 120%, rgba(0,255,208,.18), transparent 60%),
+        linear-gradient(180deg, #090417 0%, #000 70%);
+      font-family: "Orbitron", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      letter-spacing:.4px;
+      cursor: crosshair;
+      overflow-x:hidden;
+    }
+
+    /* film grain overlay */
+    body::before{
+      content:"";
+      position:fixed; inset:0;
+      background:
+        repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 2px, rgba(0,0,0,.02) 2px 4px);
+      mix-blend-mode: overlay;
+      pointer-events:none;
+      animation: flicker 4s infinite steps(2,end);
+    }
+    @keyframes flicker{50%{opacity:.9} 52%{opacity:1} 55%{opacity:.85}}
+
+    header{
+      padding: clamp(24px, 5vw, 48px);
+      display:flex; align-items:center; justify-content:space-between;
+      gap:16px; position:relative; z-index:1;
+    }
+    .brand{
+      display:flex; align-items:baseline; gap:12px;
+      text-transform:uppercase;
+    }
+    .brand .tag{
+      font: 700 11px "VT323", monospace;
+      padding:3px 8px; border:1px solid var(--neon2); border-radius:999px;
+      color:var(--neon2);
+      letter-spacing:2px
+    }
+    .nav{
+      display:flex; gap:10px; flex-wrap:wrap;
+    }
+    .nav a{
+      text-decoration:none;
+      color:var(--ink);
+      padding:8px 14px; border:1px solid #333; border-radius:999px;
+      transition: transform .15s ease, background .2s ease, border-color .2s;
+      font: 700 12px "Orbitron", sans-serif;
+    }
+    .nav a:hover{
+      border-color: var(--neon1);
+      background: rgba(255,31,143,.08);
+      transform: translateY(-2px) scale(1.02);
+      text-shadow: 0 0 6px var(--neon1);
+    }
+
+    /* glitch titleeeee fuck yea */
+    .hero{
+      padding: 0 clamp(16px, 5vw, 40px) 40px;
+    }
+    .glitch{
+      position:relative;
+      font-family: "Creepster", system-ui;
+      font-size: clamp(48px, 10vw, 128px);
+      line-height: .9;
+      letter-spacing:2px;
+      color: var(--ink);
+      text-shadow:
+        0 0 12px rgba(255,255,255,.25),
+        2px 0 0 var(--neon1),
+        -2px 0 0 var(--neon2);
+      margin:.2em 0 .1em;
+      -webkit-text-stroke: 1px rgba(0,0,0,.2);
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,.45));
+    }
+    .glitch::before,.glitch::after{
+      content:attr(data-text);
+      position:absolute; inset:0;
+      mix-blend-mode:screen;
+      clip-path: polygon(0 12%,100% 8%,100% 38%,0 42%); /* slice */
+    }
+    .glitch::before{ color:var(--neon1); transform:translateX(2px)}
+    .glitch::after{ color:var(--neon2); transform:translateX(-2px)}
+    .glitch:hover{ animation: jitter .6s infinite}
+    @keyframes jitter{
+      10%{transform:translate(-1px,1px) rotate(-.2deg)}
+      20%{transform:translate(2px,-1px) rotate(.2deg)}
+      50%{transform:translate(-2px,-2px) rotate(.1deg)}
+      80%{transform:translate(1px,2px) rotate(-.1deg)}
+    }
+
+    .subtitle{
+      font: 400 clamp(14px, 2.2vw, 18px) "VT323", monospace;
+      color: #d4d4ff;
+      max-width: 70ch;
+      letter-spacing:1px;
+      opacity:.9
+    }
+
+    /* banner marquee */
+    .marquee{
+      position:relative; overflow:hidden; border-block:1px solid #222;
+      background: rgba(176,0,42,.12);
+    }
+    .marquee-inner{
+      display:flex; gap:40px; white-space:nowrap;
+      padding:10px 0; animation: scroll 18s linear infinite;
+      font: 700 14px "Orbitron", sans-serif; letter-spacing:2px;
+      text-transform:uppercase;
+    }
+    .marquee-inner span{ color:var(--neon3)}
+    @keyframes scroll{ to{ transform: translateX(-50%)}}
+
+    /* Poster wall (image gallery) */
+    .wall{
+      padding: clamp(20px, 6vw, 60px);
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+      gap: 18px;
+    }
+    figure.card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+      border: 1px solid #2a2a2a;
+      border-radius: 18px;
+      overflow:hidden; position:relative;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s;
+    }
+    figure.card:hover{
+      transform: translateY(-6px) rotate(-.4deg);
+      border-color: var(--neon1);
+      box-shadow: 0 10px 40px rgba(255,31,143,.15), inset 0 0 40px rgba(163,255,0,.05);
+    }
+    .imgwrap{
+      aspect-ratio: 4/5;
+      background: #0c0c14;
+      display:grid; place-items:center;
+      position:relative; overflow:hidden;
+    }
+    .imgwrap::after{
+      content:"DROP IMAGE HERE";
+      font: 700 10px "Orbitron";
+      letter-spacing:2px; color:#777; opacity:.75;
+      border:1px dashed #3a3a3a; padding:6px 10px; border-radius:999px;
+    }
+    /* for imgs: set style="--img:url('assets/whatever.jpg')" on .imgwrap  */
+    .imgwrap{ background-image: var(--img); background-size: cover; background-position:center}
+    figcaption{
+      padding: 12px 14px 16px;
+      font: 400 13px "VT323", monospace;
+      color:#d8d8ff;
+    }
+    figcaption .label{
+      display:inline-block; padding:2px 8px; margin-bottom:8px;
+      border:1px solid #3a3a3a; border-radius:999px;
+      font-size:11px; letter-spacing:1px; text-transform:uppercase;
+    }
+    figcaption h3{
+      margin:6px 0 4px; font:700 18px "Orbitron"; color:var(--neon1);
+      text-shadow:0 0 8px rgba(255,31,143,.25);
+    }
+    figcaption p{ margin:0; opacity:.9 }
+
+    /* hw part block */
+    .part{
+      margin: 20px auto 80px; max-width: 980px;
+      border: 1px solid #292929; border-radius: 22px; overflow: clip;
+      background: radial-gradient(500px 200px at 100% 0, rgba(0,255,208,.08), transparent 60%),
+                  linear-gradient(180deg, rgba(255,31,143,.06), rgba(0,0,0,.0));
+    }
+    .part header{
+      padding: 18px 22px;
+      border-bottom: 1px dashed #2b2b2b; gap:10px;
+    }
+    .part header h2{
+      margin:0; font: 700 24px "Creepster"; letter-spacing:2px
+    }
+    .entry{
+      padding: 20px 22px 28px;
+      font: 400 clamp(14px, 2.1vw, 16px) "VT323", monospace;
+      line-height: 1.55;
+    }
+    .entry em{ color: var(--neon2) }
+    .entry .time{ color:#9a9a9a; font-size: .95em }
+
+    /* Big outrageous CTA buttons */
+    .cta-row{
+      display:flex; flex-wrap:wrap; gap:12px;
+      justify-content:center; padding: 0 20px 70px;
+    }
+    .btn{
+      text-decoration:none; text-transform:uppercase; letter-spacing:2px;
+      font: 700 13px "Orbitron";
+      padding: 14px 18px; border-radius: 999px;
+      border: 2px solid var(--ink);
+      background: linear-gradient(90deg, rgba(255,31,143,.12), rgba(0,255,208,.12));
+      box-shadow: 0 6px 0 #1a1a1a, 0 0 18px rgba(0,255,208,.12);
+      color: var(--ink);
+      transition: transform .15s ease, box-shadow .2s ease, background .2s ease, border-color .2s;
+    }
+    .btn:hover{
+      transform: translateY(-3px);
+      border-color: var(--neon3);
+      background: linear-gradient(90deg, rgba(163,255,0,.18), rgba(255,31,143,.18));
+      box-shadow: 0 12px 0 #121212, 0 0 28px rgba(255,31,143,.25);
+      text-shadow: 0 0 10px var(--neon3);
+    }
+
+    footer{
+      border-top:1px solid #1c1c1c; color:#9a9a9a; font: 400 12px "VT323", monospace;
+      padding: 22px; text-align:center;
+    }
+
+
+    /* Small screens */
+    @media (max-width: 520px){
+      .nav{ display:none }
+      .subtitle{ max-width: 100% }
+      .marquee-inner{ animation-duration: 22s }
+    }
+
+    /* Frame owns the size via a CSS var; default 16/9 */
+  .part .shot{
+    width: var(--w, 100%);
+    margin: 10px auto 16px;
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    overflow: hidden;
+    background:#0c0c14;
+    position: relative;
+    box-shadow: 0 8px 28px rgba(255,31,143,.12),
+                inset 0 0 40px rgba(0,255,208,.06);
+    aspect-ratio: var(--ar, 16/9);
+  }
+
+  /* Media fills frame (works for both <img> and <video>) */
+  .part .shot > img,
+  .part .shot > video{
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;          /* use 'contain' if you prefer letterboxing */
+    filter: contrast(1.05) saturate(1.08);
+  }
+
+  /* Optional: scanlines overlay stays the same */
+  .part .shot::after{
+    content:"";
+    position:absolute; inset:0;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0 1px, transparent 1px 3px);
+    mix-blend-mode: overlay; pointer-events:none;
+  }
+
+  /* Blink tag (REC) unchanged */
+  .part .shot .rec{ position:absolute; top:10px; right:10px; font: 700 10px "Orbitron", sans-serif; padding: 3px 8px; border:1px solid var(--neon1); border-radius:999px; color: var(--neon1); background: rgba(176,0,42,.15); letter-spacing:1px; }
+  /* -------- Aspect-ratio utility classes -------- */
+  .ar-4x5   { --ar: 4/5; }     /* portrait zine */
+  .ar-3x2   { --ar: 3/2; }     /* 35mm classic */
+  .ar-1x1   { --ar: 1/1; }     /* square */
+  .ar-16x9  { --ar: 16/9; }    /* landscape standard */
+  .ar-21x9  { --ar: 21/9; }    /* ultra-wide cinematic */
+  .ar-9x16  { --ar: 9/16; }    /* vertical phone */
+
+  /* -------- Optional fit + focus helpers -------- */
+  .fit-contain > img,
+  .fit-contain > video { object-fit: contain; background:#000; }
+
+  .pos-top > img,  .pos-top > video  { object-position: 50% 15%; }
+  .pos-bot > img,  .pos-bot > video  { object-position: 50% 85%; }
+  .pos-left > img, .pos-left > video { object-position: 15% 50%; }
+  .pos-right > img,.pos-right > video{ object-position: 85% 50%; }
+
+
+    .nav{
+      display:flex; gap:10px; flex-wrap:wrap;
+    }
+    .nav a{
+      text-decoration:none;
+      color:var(--ink);
+      padding:8px 14px; border:1px solid #333; border-radius:999px;
+      transition: transform .15s ease, background .2s ease, border-color .2s;
+      font: 700 12px "Orbitron", sans-serif;
+    }
+    .nav a:hover{
+      border-color: var(--neon1);
+      background: rgba(255,31,143,.08);
+      transform: translateY(-2px) scale(1.02);
+      text-shadow: 0 0 6px var(--neon1);
+    }
+
+    figure.shot{
+    position:relative;
+    margin: 14px 0 22px;
+    border:1px solid #2a2a2a;
+    border-radius:18px;
+    overflow:hidden;
+    background:#0c0c14;
+    box-shadow: 0 10px 30px rgba(255,31,143,.12);
+    }
+    .shot-video{
+    width:100%;
+    display:block;
+    aspect-ratio: 16/9;        /* keeps a nice frame if metadata is slow */
+    object-fit:cover;
+    filter: contrast(1.1) saturate(1.08);
+    }
+    .shot figcaption{
+    padding:10px 14px 14px;
+    font: 400 13px "VT323", monospace;
+    color:#d8d8ff;
+    }
+    .rec{
+    position:absolute; top:10px; left:12px;
+    font:700 12px "Orbitron", sans-serif;
+    color:#ff1f8f;
+    letter-spacing:1px;
+    text-shadow:0 0 8px rgba(255,31,143,.6);
+    animation: blink 1s steps(2,end) infinite;
+    }
+    @keyframes blink{ 50%{opacity:.3} }
+
+
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="tag">CS180 Proj0</div>
+      <div class="tag" style="border-color:var(--neon3); color:var(--neon3)">Author: Sammie Smith</div>
+      <div class="tag" style="border-color:var(--neon1); color:var(--neon1)">Fall 2025</div>
+    </div>
+     <nav class="nav">
+      <a href="#subject">subject</a>
+      <a href="#setting">setting</a>
+      <a href="#sketch">sketch</a>
+    </nav>
+  </header>
+
+  <section class="hero" aria-labelledby="title">
+    <h1 id="title" class="glitch" data-text="My Creepy Bestie">My Creepy Bestie</h1>
+    <p class="subtitle">
+      a <span style="color:var(--neon1)">glam-gore</span> glimpse into my inner circle. Meet Ariana: my home-girl, your nightmare. 
+    </p>
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-inner">
+      <span>selfie: the wrong way</span> ✢ <span>architectural perspective compression</span> ✢ <span>dolly zoom</span> ✢
+      <span>selfie: the wrong way</span> ✢ <span>architectural perspective compression</span> ✢ <span>dolly zoom</span> ✢
+      <span>selfie: the wrong way</span> ✢ <span>architectural perspective compression</span> ✢ <span>dolly zoom</span> ✢
+      <span>selfie: the wrong way</span> ✢ <span>architectural perspective compression</span> ✢ <span>dolly zoom</span> ✢
+
+    </div>
+  </div>
+
+
+
+    <!--part1: the selfie -->
+  <section id="subject" class="part" aria-labelledby="part-title">
+    <header>
+      <h2 id="part-title">THE SUBJECT</h2>
+    </header>
+    <div class="entry">
+      <p class="time">[00:13 PST] part 1: cassette hiss + cherry lipstick </p>
+        <figure class="shot">
+        <span class="rec">REC ●</span>
+        <img src="images/subject.jpg" alt="Ariana selfie, cherry lipstick, digi-cam glare" loading="lazy">
+        </figure>
+
+      <p>
+        flashed <em>up close and personal</em> glasses glint and digi cam clicks. the lipstick was melting. and so will the hearts.         
+      </p>
+      <p>
+        tonight we paint the town in <em>toxic lime</em> and dance
+        in platform boots till the streetlights glitch.
+      </p>
+    </div>
+  </section>
+
+    <!-- part2: Architechtural perspecive compression -->
+  <section id="setting" class="part" aria-labelledby="part-title">
+    <header>
+      <h2 id="part-title">THE SETTING</h2>
+    </header>
+    <div class="entry">
+      <p class="time">[00:14 PST] part 2: velvet night + fluorescent buzz</p>
+        <figure class="shot">
+        <span class="rec">REC ●</span>
+        <img src="images/setting.jpg" alt="Night city setting with hard neon and compressed perspective" loading="lazy">
+        </figure>
+
+      <p>
+        setting the scene right with <em>STEM grl attitude</em> --be impressed. 
+        
+      </p>
+      <p>
+        architectural perspective compression: 4 baddies only.
+      </p>
+    </div>
+  </section>
+
+<!-- part3: dolly zoom -->
+<section id="sketch" class="part" aria-labelledby="part-title">
+  <header>
+    <h2 id="part-title">THE SKETCH</h2>
+  </header>
+
+  <div class="entry">
+    <p class="time">[00:17 PST] part 3: hand-held waver + 5,000 takes</p>
+
+  <figure class="shot ar-9x16" style="--w: 420px">
+  <span class="rec">REC ●</span>
+  <video class="shot-video" controls autoplay loop muted playsinline preload="metadata" poster="assets/part3-poster.jpg">
+    <source src="assets/part3.mp4" type="video/mp4" />
+  </video>
+  <figcaption>Handheld dolly-zoom vibe, blurred motion</figcaption>
+</figure>
+
+
+    <p>it's giving <em>woke up this way</em> (duh). 30 retakes, who's that?</p>
+    <p>hello from the <em>void</em> bitches. we back.</p>
+  </div>
+</section>
+
+
+
+
+  <footer>
+    © <span id="yr"></span> My Creepy Bestie — made with mascara, feedback, and glitter.
+  </footer>
+
+  <script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
+
