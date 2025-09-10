@@ -75,6 +75,15 @@ def crop_final(img, border=0):
     h, w, _ = img.shape
     return img[border: h - border, border: w - border, :]
 
+def stretch(img, p1=1, p2=99): # kinda like histogram equalization i think
+    # stretch img hist to [0, 255] based on percentiles p1, p2
+    assert 0 <= p1 < p2 <= 100
+    lower = np.percentile(img, p1)
+    upper = np.percentile(img, p2)
+    stretched = ((img - lower) / (upper - lower + 1e-10))
+    stretched = np.clip(stretched, 0, 1)
+    return (stretched * 255).astype(np.uint8)
+
 ## main function
 if __name__ == "__main__":
     ensure_dir(os.path.join(OUTPUT_DIR))
@@ -113,6 +122,12 @@ if __name__ == "__main__":
 
         print("aligning image...")
         blue, green, red = split_channels(image) # split channels
+
+        # normalize channels to [0, 255]... (histogram equalization simple version)
+        blue = stretch(blue, 10, 90)
+        green = stretch(green, 1, 99)
+        red = stretch(red, 10, 90)
+
         if align_method == 'l2':
             green_offset = align_l2(blue, green, max_shift, border) # align g and r to b
             red_offset = align_l2(blue, red, max_shift, border)
