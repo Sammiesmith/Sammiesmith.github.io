@@ -180,7 +180,7 @@ def process_image(path):
 
     bgr = reconstruct(blue, green, red, (green_offset, red_offset))
 
-    out_name = os.path.splitext(os.path.basename(path))[0] + '_bells.jpg'
+    out_name = os.path.splitext(os.path.basename(path))[0] + '_pyramid.jpg'
     out_path = os.path.join(OUTPUT_DIR, out_name)
     save_rgb_as_jpg(out_path, bgr)
     print("  saved to", out_path)

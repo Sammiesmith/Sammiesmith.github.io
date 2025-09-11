@@ -127,9 +127,9 @@ def process_image(path, method='ncc', stretch_bool=False):
 
     # save output
     base_file_name = os.path.splitext(file_name)[0]
-    if stretch_bool:
-        base_file_name += "_stretch"
-    base_file_name += f"_{align_method}"
+    # if stretch_bool:
+    #     base_file_name += "_stretch"
+    # base_file_name += f"_{align_method}"
 
     output_path = os.path.join(OUTPUT_DIR, base_file_name + '.jpg')
     written = cv2.imwrite(output_path, final_image)
@@ -150,10 +150,10 @@ def main():
         sys.exit(0)
 
     else:
-        method = 'l2'  # default
-        stretch = False # default
+        method = 'ncc'  # default
+        stretch = True # default
         files = []
-        files += glob.glob(os.path.join(DATA_DIR, '*.jpg')) 
+        files += glob.glob(os.path.join(DATA_DIR, '*_naive.jpg')) 
         if not files:
             print("no input files found in", DATA_DIR)
             return
