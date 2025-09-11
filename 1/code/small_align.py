@@ -2,9 +2,10 @@ import numpy as np
 import cv2
 import os
 import sys
+import glob
 
 DATA_DIR = os.path.join('..', 'data')
-OUTPUT_DIR = os.path.join('..', 'outputs')
+OUTPUT_DIR = os.path.join('..', 'outputs_new')
 
 def ensure_dir(directory):
     if not os.path.exists(directory):
@@ -84,73 +85,81 @@ def stretch(img, p1=1, p2=99): # kinda like histogram equalization i think
     stretched = np.clip(stretched, 0, 1)
     return (stretched * 255).astype(np.uint8)
 
-## main function
-if __name__ == "__main__":
-    ensure_dir(os.path.join(OUTPUT_DIR))
+def process_image(path, method='ncc', stretch_bool=False):
+    align_method = method  # 'l2' or 'ncc'
+    max_shift = 15
+    border = 10  # crop border for alignment metric computation
 
-    from glob import glob
-    input_files = glob(os.path.join(DATA_DIR, '*.jpg'))
-    print(f"found {len(input_files)} input files")
+    file_name = os.path.basename(path)
+    print(f"processing {file_name}...")
 
-    align_method = 'ncc' # 'l2' or 'ncc'
-    max_shift = 30
-    border = 50
-
-
-    for in_path in input_files:
-        file_name = os.path.basename(in_path)
-        print(f"processing {file_name}...")
-
-        # load grayscale imgs 
-        image = cv2.imread(in_path, cv2.IMREAD_GRAYSCALE)
-        if image is None:
-            print(f"  skipping {file_name}, not found or cannot be opened.")
-            continue
-
+    # load grayscale imgs 
+    image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+    if image is None:
+        print(f"  skipping {file_name}, not found or cannot be opened.")
     
-    # file_name = sys.argv[1] if len(sys.argv) > 1 else 'tobolsk.jpg'
-    # max_shift = int(sys.argv[2]) if len(sys.argv) > 2 else 30
-    # border = int(sys.argv[3]) if len(sys.argv) > 3 else 50
-    # align_method = sys.argv[4] if len(sys.argv) > 4 else 'ncc' # l2 or ncc
 
-    # load img as grayscale
-    # print("loading image...")
-    # image_path = os.path.join(DATA_DIR, file_name)
-    # image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-    # if image is None:
-    #     raise FileNotFoundError(f"Image file '{image_path}' not found.")
+    blue, green, red = split_channels(image)
 
-        print("aligning image...")
-        blue, green, red = split_channels(image) # split channels
-
-        # normalize channels to [0, 255]... (histogram equalization simple version)
+    # normalize channels to [0, 255]... (histogram equalization simple version)
+    if stretch_bool:
         blue = stretch(blue, 10, 90)
         green = stretch(green, 1, 99)
         red = stretch(red, 10, 90)
 
-        if align_method == 'l2':
-            green_offset = align_l2(blue, green, max_shift, border) # align g and r to b
-            red_offset = align_l2(blue, red, max_shift, border)
-        elif align_method == 'ncc':
-            green_offset = align_ncc(blue, green, max_shift, border) # align g and r to b
-            red_offset = align_ncc(blue, red, max_shift, border)
-        else:
-            raise NotImplementedError(f"Alignment method '{align_method}' is not implemented. Only 'l2' and 'ncc' are available.")
+    if align_method == 'l2':
+        green_offset = align_l2(blue, green, max_shift, border) # align g and r to b
+        red_offset = align_l2(blue, red, max_shift, border)
+    elif align_method == 'ncc':
+        green_offset = align_ncc(blue, green, max_shift, border) # align g and r to b
+        red_offset = align_ncc(blue, red, max_shift, border)
+    else:
+        raise NotImplementedError(f"Alignment method '{align_method}' is not implemented. Only 'l2' and 'ncc' are available.")
 
-        
-        print(f"  G offset (dy, dx): {green_offset}")
-        print(f"  R offset (dy, dx): {red_offset}")
+    
+    print(f"  G offset (dy, dx): {green_offset}")
+    print(f"  R offset (dy, dx): {red_offset}")
 
-        print("reconstructing image...")
-        aligned_image = reconstruct(blue, green, red, (green_offset, red_offset))
+    print("reconstructing image...")
+    aligned_image = reconstruct(blue, green, red, (green_offset, red_offset))
 
-        final_image = crop_final(aligned_image, border=7)
+    final_image = crop_final(aligned_image, border=7)
 
-        # save output
-        output_path = os.path.join(OUTPUT_DIR, file_name)
-        written = cv2.imwrite(output_path, final_image)
+    # save output
+    base_file_name = os.path.splitext(file_name)[0]
+    if stretch_bool:
+        base_file_name += "_stretch"
+    base_file_name += f"_{align_method}"
 
-        if not written:
-            absolute_path = os.path.abspath(output_path)
-            raise RuntimeError(f"cs2.imwrite failed... does this path exist? {absolute_path}")
-        print(f"saved aligned image to {output_path}")
+    output_path = os.path.join(OUTPUT_DIR, base_file_name + '.jpg')
+    written = cv2.imwrite(output_path, final_image)
+
+    if not written:
+        absolute_path = os.path.abspath(output_path)
+        raise RuntimeError(f"cs2.imwrite failed... does this path exist? {absolute_path}")
+    print(f"saved aligned image to {output_path}")
+
+def main():
+    ensure_dir(os.path.join(OUTPUT_DIR))
+
+    if len(sys.argv) > 1:
+        input_file = sys.argv[1]
+        method = sys.argv[2] if len(sys.argv) > 2 else 'ncc'
+        stretch =  sys.argv[3].lower() in ('true', '1', 'yes') if len(sys.argv) > 3 else False
+        process_image(os.path.join(DATA_DIR, input_file), method=method, stretch_bool=stretch)
+        sys.exit(0)
+
+    else:
+        method = 'l2'  # default
+        stretch = False # default
+        files = []
+        files += glob.glob(os.path.join(DATA_DIR, '*.jpg')) 
+        if not files:
+            print("no input files found in", DATA_DIR)
+            return
+        for p in sorted(files):
+            process_image(p, method=method, stretch_bool=stretch)
+
+## main function
+if __name__ == "__main__":
+    main()

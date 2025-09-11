@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CS180 Project 1 - Images of the Russian Empire</title>
+  <style>
+  :root {
+    /* background gradient: top (pink) → bottom (purple) */
+    --bg1: #f77070;   /* light pink */
+    --bg2: #f7a42f;   /* soft purple */
+
+    /* card background */
+    --card: #f9b4d7;   /* white cards for contrast */
+
+    /* text colors */
+    --ink: #2e2a3b;    /* dark text */
+    --muted: #6c6783;  /* muted text */
+
+    /* accent colors */
+    --accent: #ff7ca8; /* brighter pink accent */
+    --accent2: #4f384f;/* lavender accent */
+    --ok: #4fc3c8;     /* teal-green for tags */
+  }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:system-ui, sans-serif;
+      background: linear-gradient(#f3e0e0, #f7e6cf);
+      color:var(--ink);
+        
+    }
+    a{color:var(--accent)}
+    header{position:sticky;top:0;z-index:10;background: #f5f5f5;backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid #1c2138}
+    .wrap{max-width:1100px;margin:0 auto;padding:24px}
+    .brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+    .brand h1{margin:0;font-size:clamp(22px,3vw,28px);letter-spacing:.3px}
+    nav{margin-top:8px;display:flex;gap:18px;flex-wrap:wrap}
+    nav a{text-decoration:none;color:var(--muted);font-weight:600}
+    nav a:hover{color:var(--accent)}
+    main{padding:32px 0}
+    section{scroll-margin-top:96px;margin-bottom:28px}
+    h2{font-size:clamp(20px,2.4vw,26px);margin:0 0 12px}
+    p{line-height:1.6;color:var(--ink);margin:0 0 12px}
+    .muted{color:var(--muted)}
+    .card{background:#f4f4f4;border:1px solid #1c2240;padding:18px;border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,.25)}
+    .grid{display:grid;gap:18px}
+    .cols-2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+    .cols-3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+    figure{margin:0}
+    figure img{width:100%;height:auto;border-radius:12px;display:block;border:1px solid #222a4a}
+    figcaption{font-size:13px;color:var(--muted);margin-top:6px}
+    .kpi{display:flex;gap:8px;flex-wrap:wrap}
+    .tag{background:#f6eff4; border:1px solid #d1a4c6;padding:3px 8px;border-radius:999px;font-size:12px}
+    .good{border-color:#275a37;color:var(--ok)}
+    code{background:#6236ba;border:1px solid #160748;padding:2px 6px;border-radius:6px;color:#f6f0f5}
+    footer{border-top:1px solid #1c2138;margin-top:22px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="brand">
+        <h1>CS180 Project 1 · Images of the Russian Empire</h1>
+        <span class="tag">Fall 2025</span>
+        <span class="tag">Author: Sammie Smith</span>
+      </div>
+      <nav>
+        <a href="#overview">Overview</a>
+        <a href="#naive">Naïve Method</a>
+        <a href="#pyramid">Pyramid Speedup</a>
+        <a href="#improvements">Improvements</a>
+        <a href="#gallery">Gallery</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="overview" class="card">
+      <h2>Overview</h2>
+      <p>
+        We reconstruct color photographs from Sergei Mikhailovich Prokudin‑Gorskii’s
+        three filtered glass plates by <strong>auto‑aligning</strong> the red and green channels to blue and stacking them into RGB.
+        The code uses robust similarity scoring and a coarse‑to‑fine search to align quickly and resist lighting variation.
+      </p>
+      <div class="kpi">
+        <span class="tag">Similarity: <code>NCC</code> (or L2)</span>
+        <span class="tag">Edges: <code>Sobel</code></span>
+        <span class="tag">Border crop: <code>10 px</code></span>
+        <span class="tag">Coarse window: <code>±48</code></span>
+        <span class="tag">Refine window: <code>±15</code></span>
+        <span class="tag">Max levels: <code>6</code></span>
+        <span class="tag">Formats: <code>uint8/uint16 → [0,1]</code></span>
+      </div>
+    </section>
+
+    <section id="naive" class="card">
+      <h2>Naïve Method</h2>
+      <p>
+        Split the stacked grayscale plate vertically into <strong>B, G, R</strong>; for each of G and R, perform an exhaustive
+        search over displacements within a small window relative to B. Score candidate shifts with <strong>NCC</strong>
+        (zero‑mean, variance‑normalized) or <strong>L2 Norm</strong>. Crop borders (naively) to avoid edge artifacts and compare only the
+        <strong>overlapping slices</strong> to prevent out‑of‑bounds and unfair comparisons. Reconstruct the color image by
+        rolling channels by the chosen offsets and stacking to RGB.
+      </p>
+      <div class="grid cols-2">
+        <figure>
+          <img src="outputs_new/cathedral_ncc.jpg" alt="cathedral_ncc" />
+          <figcaption><strong>NCC</strong> yields sharper alignment than L2 under exposure differences.</figcaption>
+        </figure>
+        <figure>
+          <img src="outputs_new/cathedral_l2.jpg" alt="cathedral_l2" />
+          <figcaption><strong>L2</strong> is sensitive to brightness/contrast; can blur when channels differ.</figcaption>
+        </figure>
+
+
+      </div>
+    </section>
+
+    
+    <section id="naive_improve" class="card">
+      <h2>Naïve Method Improved</h2>
+      <p>
+          Percentile stretching of channels can reduce outliers but may flatten highlights/shadows if overdone. I chose to increase intensity of green by 1st-99th percentile and blue/red by 10th-90th percentile. This worked for most images, but is not a one-all fix.
+      </p>
+      <div class="grid cols-2">
+        <figure>
+          <img src="outputs_new/cathedral_stretch_ncc.jpg" alt="cathedralstretch__ncc" />
+          <figcaption><strong>NCC + Stretching</strong> provides a good color balance here.</figcaption>
+        </figure>
+        <figure>
+          <img src="outputs_new/khan_stretch_ncc.jpg" alt="khan_stretch_ncc" />
+          <figcaption><strong>NCC + Stretching</strong> makes greens too intense. </figcaption>
+        </figure>
+
+
+      </div>
+    </section>
+
+    <section id="pyramid" class="card">
+      <h2>Image Pyramid Speedup</h2>
+      <p>
+        Build a Gaussian pyramid (downsample ×2 per level). At the <em>coarsest</em> level, do a wide brute‑force search; scale the
+        best shift by 2 and <em>refine locally</em> at the next level. Repeat until full resolution. This keeps large searches cheap and
+        high‑res refinement focused, delivering big speedups with accurate final offsets.
+      </p>
+      <div class="grid cols-2">
+        <figure>
+          <img src="outputs/castle.jpgstretch.jpg" alt="church pyramid baseline" />
+          <figcaption>Baseline pyramid alignment (coarse→fine displacement refinement).</figcaption>
+        </figure>
+
+      </div>
+    </section>
+
+    <section id="improvements" class="card">
+      <h2>Improvements (“Bells &amp; Whistles”)</h2>
+      <ul>
+        <li><strong>Robustness:</strong> normalize <code>uint8/uint16</code> inputs to <code>[0,1]</code>; score with <strong>NCC</strong> to ignore brightness/contrast shifts.</li>
+        <li><strong>Feature focus:</strong> compare <strong>Sobel edge</strong> maps rather than raw intensities for lighting‑invariant texture matching.</li>
+        <li><strong>Fair comparisons:</strong> compute <strong>overlapping slices</strong> for each shift to avoid padding/garbage pixels and skip tiny overlaps.</li>
+        <li><strong>Border handling:</strong> crop a small interior region to remove bright plate edges that can mislead scoring.</li>
+        <li><strong>Coarse→fine search:</strong> seed fine‑scale alignment from coarse results; use <strong>local refine windows</strong> for speed and accuracy.</li>
+      </ul>
+      <div class="grid cols-2">
+        <figure>
+          <img src="outputs/church.jpg" alt="church pyramid baseline" />
+          <figcaption>Baseline pyramid alignment (coarse→fine displacement refinement).</figcaption>
+        </figure>
+        <figure>
+          <img src="outputs_new/church_bells.jpg" alt="church bells and whistles" />
+          <figcaption>With edge features and careful slicing, refinement is crisper and less noisy.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+<section id="gallery" class="card"> 
+  <h2>Gallery </h2>
+  <p class="muted">All aligned outputs with <code>_bells.jpg</code>. Captions show (green dy,dx) and (red dy,dx).</p>
+  <div class="grid cols-3">
+
+    <figure>
+      <img src="outputs_new/4people_bells.jpg" alt="Cathedral bells" />
+      <figcaption><strong>My Choice: 4 people</strong> —  green offset: (5, 0) red offset: (8, -5)</figcaption>
+    </figure>
+
+    <figure>
+      <img src="outputs_new/khan_bells.jpg" alt="Cathedral bells" />
+      <figcaption><strong>My Choice: Khan</strong> — green offset: (1, 0) red offset: (1, 0). Note: this was the only image that the bells and whistles + image pyramid algorithm did not align. Naive brute force method worked much better, probably because the RGB negatives already have uniform brightness/contrast. Edge maps, cropping, and pyramids can add too much noise.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="outputs_new/castle_bells.jpg" alt="Cathedral bells" />
+      <figcaption><strong>My Choice: Castle</strong> — green offset: (-1, -2) red offset: (0, -3)</figcaption>
+    </figure>
+
+    <figure>
+      <img src="outputs_new/cathedral_bells.jpg" alt="Cathedral bells" />
+      <figcaption><strong>Cathedral</strong> — green (5, 2), red (12, 3)</figcaption>
+    </figure>
+
+
+
+    <figure>
+      <img src="outputs_new/church_bells.jpg" alt="Church bells" />
+      <figcaption><strong>Church</strong> — green (25, -2), red (58, -14)</figcaption>
+    </figure>
+
+    <figure>
+      <img src="outputs_new/emir_bells.jpg" alt="Emir bells" />
+      <figcaption><strong>Emir</strong> — green (49, 23), red (107, 40)</figcaption>
+    </figure>
+
+    <figure>
+      <img src="outputs_new/harvesters_bells.jpg" alt="Harvesters bells" />
+      <figcaption><strong>Harvesters</strong> — green (70, -6), red (123, 4)</figcaption>
+    </figure>
+
+    <figure>
+      <img src="outputs_new/icon_bells.jpg" alt="Icon bells" />
+      <figcaption><strong>Icon</strong> — green (42, 17), red (90, 23)</figcaption>
+    </figure>
+
+    <figure>
+      <img src="outputs_new/italil_bells.jpg" alt="Italil bells" />
+      <figcaption><strong>Italil</strong> — green (39, 22), red (77, 35)</figcaption>
+    </figure>
+
+    <figure>
+      <img src="outputs_new/lastochikino_bells.jpg" alt="Lastochikino bells" />
+      <figcaption><strong>Lastochikino</strong> — green (-3, -3), red (76, -8)</figcaption>
+    </figure>
+
+    <figure>
+      <img src="outputs_new/lugano_bells.jpg" alt="Lugano bells" />
+      <figcaption><strong>Lugano</strong> — green (41, -11), red (92, -29)</figcaption>
+    </figure>
+
+    <figure>
+      <img src="outputs_new/melons_bells.jpg" alt="Melons bells" />
+      <figcaption><strong>Melons</strong> — green (78, 5), red (177, 11)</figcaption>
+    </figure>
+
+    <figure>
+      <img src="outputs_new/monastery_bells.jpg" alt="Monastery bells" />
+      <figcaption><strong>Monastery</strong> — green (-3, 0), red (3, 0)</figcaption>
+    </figure>
+
+    <figure>
+      <img src="outputs_new/self_portrait_bells.jpg" alt="Self Portrait bells" />
+      <figcaption><strong>Self Portrait</strong> — green (78, -3), red (178, -1)</figcaption>
+    </figure>
+
+    <figure>
+      <img src="outputs_new/siren_bells.jpg" alt="Siren bells" />
+      <figcaption><strong>Siren</strong> — green (48, -8), red (96, -24)</figcaption>
+    </figure>
+
+    <figure>
+      <img src="outputs_new/three_generations_bells.jpg" alt="Three Generations bells" />
+      <figcaption><strong>Three Generations</strong> — green (54, 0), red (111, 7)</figcaption>
+    </figure>
+
+    <figure>
+      <img src="outputs_new/tobolsk_bells.jpg" alt="Tobolsk bells" />
+      <figcaption><strong>Tobolsk</strong> — green (3, 2), red (6, 3)</figcaption>
+    </figure>
+
+  </div>
+</section>
+
+    <footer class="wrap">
+      <p class="muted"> Fun proj, thanks course staff!</p>
+    </footer>
+  </main>
+</body>
+</html>
