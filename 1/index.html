@@ -81,7 +81,7 @@
     <section id="overview" class="card">
       <h2>Overview</h2>
       <p>
-        We reconstruct color photographs from Sergei Mikhailovich Prokudin‑Gorskii’s
+        In this project, I reconstruct color photographs from Sergei Mikhailovich Prokudin‑Gorskii’s
         three filtered glass plates by <strong>auto‑aligning</strong> the red and green channels to blue and stacking them into RGB.
         The code uses robust similarity scoring and a coarse‑to‑fine search to align quickly and resist lighting variation.
       </p>
@@ -142,13 +142,13 @@
     <section id="pyramid" class="card">
       <h2>Image Pyramid Speedup</h2>
       <p>
-        Build a Gaussian pyramid (downsample ×2 per level). At the <em>coarsest</em> level, do a wide brute‑force search; scale the
+        I built a coarse-to-fine image pyramid via subsampling. At the <em>coarsest</em> level, do a wide brute‑force search; scale the
         best shift by 2 and <em>refine locally</em> at the next level. Repeat until full resolution. This keeps large searches cheap and
         high‑res refinement focused, delivering big speedups with accurate final offsets.
       </p>
       <div class="grid cols-2">
         <figure>
-          <img src="outputs/castle.jpgstretch.jpg" alt="church pyramid baseline" />
+          <img src="outputs_new/italil_pyramid.jpg" alt="church pyramid baseline" />
           <figcaption>Baseline pyramid alignment (coarse→fine displacement refinement).</figcaption>
         </figure>
 
@@ -156,14 +156,19 @@
     </section>
 
     <section id="improvements" class="card">
-      <h2>Improvements (“Bells &amp; Whistles”)</h2>
+      <h2>Improvements + “Bells &amp; Whistles”</h2>
+      <p> My Improvements</p>
       <ul>
         <li><strong>Robustness:</strong> normalize <code>uint8/uint16</code> inputs to <code>[0,1]</code>; score with <strong>NCC</strong> to ignore brightness/contrast shifts.</li>
-        <li><strong>Feature focus:</strong> compare <strong>Sobel edge</strong> maps rather than raw intensities for lighting‑invariant texture matching.</li>
         <li><strong>Fair comparisons:</strong> compute <strong>overlapping slices</strong> for each shift to avoid padding/garbage pixels and skip tiny overlaps.</li>
-        <li><strong>Border handling:</strong> crop a small interior region to remove bright plate edges that can mislead scoring.</li>
+        <li><strong>Border handling:</strong> naively crop a small interior region to remove bright plate edges that can mislead scoring.</li>
         <li><strong>Coarse→fine search:</strong> seed fine‑scale alignment from coarse results; use <strong>local refine windows</strong> for speed and accuracy.</li>
       </ul>
+      <p> Bells and Whistles </p>
+            <ul>
+        <li><strong>Feature focus:</strong> compare <strong>Sobel edge</strong> maps rather than raw intensities for lighting‑invariant texture matching.</li>
+      </ul>
+
       <div class="grid cols-2">
         <figure>
           <img src="outputs/church.jpg" alt="church pyramid baseline" />
@@ -178,7 +183,7 @@
 
 <section id="gallery" class="card"> 
   <h2>Gallery </h2>
-  <p class="muted">All aligned outputs with <code>_bells.jpg</code>. Captions show (green dy,dx) and (red dy,dx).</p>
+  <p class="muted">All aligned Bells and Whistles outputs (with <code>_bells.jpg</code>). Captions show (green dy,dx) and (red dy,dx).</p>
   <div class="grid cols-3">
 
     <figure>
