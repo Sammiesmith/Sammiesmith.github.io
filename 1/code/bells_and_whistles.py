@@ -37,12 +37,18 @@ def crop_internal(img, border=10):
     h, w = img.shape
     return img[border: h - border, border: w - border]
 
+def sobel_edges(img): 
+    # return image edges using sobel filter
+    img = img.astype(np.float32)
+    grad_x = cv2.Sobel(img, cv2.CV_32F, 1, 0, ksize=3)
+    grad_y = cv2.Sobel(img, cv2.CV_32F, 0, 1, ksize=3)
+    edges = np.sqrt(grad_x**2 + grad_y**2)
+    return edges
 
 def build_image_pyramid(img):
-    # use cv.resize to build pyramid of image from scratch (convolutions + resize in one step)
-    h, w = img.shape[:2] # USE CV.resize, cv.resize is the only cv method allowed
-    img_small = cv2.resize(img, (w//2, h//2), interpolation=cv2.INTER_LINEAR)
-    return img_small
+    # use gaussianblur and downsample to build pyramid of image from scratch
+    blur = cv2.GaussianBlur(img, (5,5), 0) # apply 5x5 kernel
+    return blur[::2, ::2] # downsample by factor of 2
 
 #--------------------- scoring funcs ------------------
 def ncc(a,b):
@@ -55,31 +61,70 @@ def l2(a,b):
     difference = a - b
     return float(np.sum(difference ** 2))
 
-def align_naive(base, target, max_shift=15, border=10, center_shift=None, metric="ncc"):
-    base = crop_internal(base, border).astype(np.float32)
+def get_overlapping_slices(h, w, y_shift, x_shift):
+    # return slices for overlapping region of two images shifted by (y_shift, x_shift)
+    if y_shift >= 0:
+        y_start_base, y_end_base = y_shift, h
+        y_start_target, y_end_target = 0, h - y_shift
+    else:
+        y_start_base, y_end_base = 0, h + y_shift
+        y_start_target, y_end_target = -y_shift, h 
+
+    if x_shift >= 0:
+        x_start_base, x_end_base = x_shift, w
+        x_start_target, x_end_target = 0, w - x_shift
+    else:
+        x_start_base, x_end_base = 0, w + x_shift
+        x_start_target, x_end_target = -x_shift, w
+
+    base_slice = (slice(y_start_base, y_end_base), slice(x_start_base, x_end_base))
+    target_slice = (slice(y_start_target, y_end_target), slice(x_start_target, x_end_target))
+
+    return base_slice, target_slice
+
+def align_naive(base_img, target_img, max_shift=15, metric=METRIC, border_crop=BORDER_CROP, center_shift=None):
+    # align target_img to base_img by exhausitively searching over patches in [-max_shift, max_shift]
+    assert metric in ['l2', 'ncc']
+
+    base_img = crop_internal(base_img, border_crop).astype(np.float32)
+    target_img = crop_internal(target_img, border_crop).astype(np.float32)
+
+    base_img = sobel_edges(base_img)
+    target_img = sobel_edges(target_img)
+
+    h, w = base_img.shape
     best_offset = (0,0) if center_shift is None else center_shift
     best_score = -1.0 if metric == 'ncc' else float('inf')
 
-    for x_shift in range(-max_shift, max_shift + 1):
-        for y_shift in range(-max_shift, max_shift + 1):
-            shifted_target = np.roll(target, shift=(y_shift, x_shift), axis=(0, 1))
-            shifted_target = crop_internal(shifted_target).astype(np.float32)
+    if center_shift is None:
+        y_shift_center, x_shift_center = 0, 0
+    else:
+        y_shift_center, x_shift_center = center_shift
 
-            if metric == "nnc":
-                score = ncc(base, shifted_target) #ncc score
 
+    for x_shift in range(x_shift_center - max_shift, x_shift_center + max_shift + 1):
+        for y_shift in range(y_shift_center - max_shift, y_shift_center + max_shift + 1):
+            base_slice, target_slice  = get_overlapping_slices(h, w, y_shift, x_shift)
+
+            # speedup... skip if not enough overlap
+            if (base_slice[0].stop - base_slice[0].start < 20) or (base_slice[1].stop - base_slice[1].start < 20):
+                continue
+
+            base_patch = base_img[base_slice]
+            target_patch = target_img[target_slice]
+
+            if metric == 'ncc':
+                score = ncc(base_patch, target_patch)
                 if score > best_score:
                     best_score = score
                     best_offset = (y_shift, x_shift)
-            elif metric == 'l2':
-                score = l2(base, shifted_target) # l2 score
+            else: # l2
+                score = l2(base_patch, target_patch)
                 if score < best_score:
                     best_score = score
                     best_offset = (y_shift, x_shift)
 
     return best_offset
-
-
 
 def align_pyramid(base_img, target_img, metric=METRIC, border_crop=BORDER_CROP, 
                   coarse_window=COARSE_SEARCH, refine_window=REFINE_SEARCH, max_levels=MAX_LEVELS):
@@ -93,7 +138,7 @@ def align_pyramid(base_img, target_img, metric=METRIC, border_crop=BORDER_CROP,
 
     # base case (img small enoigh)
     if max(base_img.shape[0], base_img.shape[1]) <= 400 or max_levels == 0:
-        return align_naive(base_img, target_img, max_shift=coarse_window, metric=metric, border=border_crop)
+        return align_naive(base_img, target_img, coarse_window, metric, border_crop)
     
     # recursive step on smaller imgs
     base_small = build_image_pyramid(base_img)
@@ -106,7 +151,7 @@ def align_pyramid(base_img, target_img, metric=METRIC, border_crop=BORDER_CROP,
     scaled_shift = (coarse_shift[0] * 2, coarse_shift[1] * 2)
 
     # refine at current scale w small local search
-    refined_shift = align_naive(base_img, target_img, center_shift=scaled_shift)
+    refined_shift = align_naive(base_img, target_img, refine_window, metric, border_crop, center_shift=scaled_shift)
 
     return refined_shift
 
@@ -148,6 +193,7 @@ def main():
 
     else:
         files = []
+        files += glob.glob(os.path.join(DATA_DIR, '*.jpg'))
         files += glob.glob(os.path.join(DATA_DIR, '*.tif'))
         if not files:
             print("no input files found in", DATA_DIR)
