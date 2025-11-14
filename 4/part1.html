@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 Project 4: Neural Radiance Fields</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        section {
+            background: white;
+            margin: 2rem 0;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        h3 {
+            color: #764ba2;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem 0;
+        }
+        
+        p {
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+        
+        .image-container {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .image-caption {
+            font-style: italic;
+            color: #666;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .code-block {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            border-radius: 4px;
+        }
+        
+        .hyperparameters {
+            background: #f0f4ff;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        .hyperparameters ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .hyperparameters li {
+            padding: 0.3rem 0;
+        }
+        
+        .hyperparameters strong {
+            color: #667eea;
+        }
+        
+        .grid-2col {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .grid-4col {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2col,
+            .grid-4col {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 1.8rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        .observation-box {
+            background: #fff9e6;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        
+        .observation-box h4 {
+            color: #f57c00;
+            margin-bottom: 0.5rem;
+        }
+        
+        .observation-box ol {
+            margin-left: 1.5rem;
+        }
+        
+        .observation-box li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>CS180 Project 4: 3D Reconstruction from 2D Images using NeRF</h1>
+        <p><strong>Author:</strong> Sammie Smith | <strong>Semester:</strong> Fall 2025</p>
+        <div class="nav">
+            <a href="part2.html">Go to Part 2 →</a>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <!-- Part 1 Section -->
+        <section>
+            <h2>Part 1: Fitting a Neural Field to a 2D Image</h2>
+            
+            <h3>Implementing the Dataloader</h3>
+            <p>
+                Running neural networks is computationally expensive, particularly when there's a lot of input data. 
+                An image with many pixels means that there will be many nodes in the first layer… and a lot more 
+                expensive convolutions to compute. To help with this problem, I made a dataloader that reduces image 
+                size by randomly sampling a batch of pixels. First, I read in images, then created a meshgrid-based 
+                normalized to [0,1] to sample coordinates from. I also normalized colors to [0,1] range so that I 
+                can use PSNR loss later in my training loop. Lastly, I wrote a sampling function that randomly 
+                samples N pixels from the image by randomly sampling 1) the coords from the meshgrid (then 
+                de-normalizing back to image coordinates) and 2) the corresponding colors. Below is a visualization 
+                of 100 random pixel samples from the fox image.
+            </p>
+            
+            <div class="image-container">
+                <img src="./output_imgs/sampled_pixels_fox.jpeg" alt="Sampled pixels from fox image">
+                <p class="image-caption">Figure 1: 100 randomly sampled pixels from the fox image</p>
+            </div>
+        </section>
+
+        <!-- Model Architecture Section -->
+        <section>
+            <h3>Model Architecture</h3>
+            <p>I used the same architecture as provided in the project specification.</p>
+            
+            <div class="image-container">
+                <img src="./output_imgs/model_architecture.jpg" alt="Model architecture diagram">
+                <p class="image-caption">Figure 2: Neural field network architecture</p>
+            </div>
+            
+            <div class="hyperparameters">
+                <h4>Training Hyperparameters:</h4>
+                <ul>
+                    <li><strong>num_iterations:</strong> 2000</li>
+                    <li><strong>batch_size:</strong> 10000</li>
+                    <li><strong>learning_rate:</strong> 1e-2</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Training Progression Section -->
+        <section>
+            <h3>Training Progression on Fox Image</h3>
+            <p>
+                As training progresses, we slowly start to see the fox's facial features build up and loss diminish. 
+                This makes me think of how we learned about texture features in lecture. Both humans and neural 
+                networks compute statistics on textures to identify the subject. We do not see leg, eye, stripes, 
+                fangs, and think tiger! We just know that it looks like a tiger from the many tiger pictures we've 
+                seen before. This reminds me of that; you can see how layers of texture come together to see a fox.
+            </p>
+            
+            <div class="image-container">
+                <img src="./output_imgs/fox_progression.jpg" alt="Fox training progression">
+                <p class="image-caption">Figure 3: Training progression showing fox reconstruction over iterations</p>
+            </div>
+        </section>
+
+        <!-- My Image Section -->
+        <section>
+            <h3>Training Progression on My Image (L=1, Width=10,000)</h3>
+            
+            <div class="image-container">
+                <img src="./output_imgs/adrian_progression.jpg" alt="Adrian training progression">
+                <p class="image-caption">Figure 4: Training progression on custom image</p>
+            </div>
+            
+            <div class="image-container">
+                <img src="./output_imgs/adrian_final_reconstruction.jpg" alt="Adrian final reconstruction">
+                <p class="image-caption">Figure 5: Final reconstruction of custom image</p>
+            </div>
+        </section>
+
+        <!-- Hyperparameter Sweep Section -->
+        <section>
+            <h2>Hyperparameter Sweep on Fox</h2>
+            
+            <div class="observation-box">
+                <h4>Observations:</h4>
+                <ol>
+                    <li>
+                        <strong>Effect of L value:</strong> Too large of an L value blurs the image. I think that 
+                        this is because we add so many extra values in the positional encoding, we weight the 
+                        original coordinates less. An extremely low value L=1 gives the best reconstruction, 
+                        although it can't capture details of fur. When L=5, we lose some of the structure of the 
+                        fox's face, but we see more details. L=15 completely wipes away the fox's face.
+                    </li>
+                    <li>
+                        <strong>Effect of network width:</strong> Inputting more pixels into the neural network 
+                        gives a better reconstruction. This makes sense: the more pixels to work with, the better 
+                        we can piece together the original image. In deep learning in general, you can get better 
+                        results by 1) getting more data or 2) making thoughtful design decisions. In this case, 
+                        since the task is small and there are more pixels to sample from, I can just get more data. 
+                        This is usually not feasible on real world problems.
+                    </li>
+                </ol>
+            </div>
+            
+            <div class="grid-4col">
+                <div class="image-container">
+                    <img src="./output_imgs/fox_l5_w1000.jpeg" alt="Fox L=5, Width=1000">
+                    <p class="image-caption">L=5, Width=1000</p>
+                </div>
+                
+                <div class="image-container">
+                    <img src="./output_imgs/fox_l15_w1000.jpg" alt="Fox L=15, Width=1000">
+                    <p class="image-caption">L=15, Width=1000</p>
+                </div>
+                
+                <div class="image-container">
+                    <img src="./output_imgs/fox_l5_w100000.jpg" alt="Fox L=5, Width=100000">
+                    <p class="image-caption">L=5, Width=100,000</p>
+                </div>
+                
+                <div class="image-container">
+                    <img src="./output_imgs/fox_l15_w100000.jpg" alt="Fox L=15, Width=100000">
+                    <p class="image-caption">L=15, Width=100,000</p>
+                </div>
+            </div>
+            
+            <h3>Extreme Limitation of Frequency: L=1, Width=10,000</h3>
+            <div class="image-container">
+                <img src="./output_imgs/fox_l1_w10000.jpg" alt="Fox L=1, Width=10000">
+                <p class="image-caption">Figure 6: Best reconstruction with L=1, Width=10,000</p>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

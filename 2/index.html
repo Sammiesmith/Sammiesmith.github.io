@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CS180 Project 2: Fun With Filters And Frequencies — Sammie Smith</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0e0f12;
+      --panel:#151821;
+      --muted:#8f96a3;
+      --text:#e8ecf1;
+      --accent:#7aa2ff;
+      --accent-2:#00d1b2;
+      --border: #232737;
+      --shadow: 0 10px 25px rgba(0,0,0,.35);
+      --radius: 14px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:linear-gradient(180deg,#0e0f12 0%,#0d1220 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.65}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:1100px;margin:48px auto;padding:0 20px}
+    header{
+      background:linear-gradient(135deg, rgba(122,162,255,.15), rgba(0,209,178,.10));
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      border-radius:var(--radius);
+      padding:28px 28px;
+      margin-bottom:28px;
+    }
+    h1{margin:0 0 6px 0;font-weight:800;font-size: clamp(28px, 4vw, 40px);}
+    .meta{color:var(--muted);font-weight:600}
+    h2{margin:40px 0 12px 0;font-weight:800;font-size: clamp(22px, 3.2vw, 28px)}
+    h3{margin:24px 0 8px 0;font-weight:700;font-size: clamp(18px, 2.6vw, 22px)}
+    p{margin:10px 0;color:var(--text)}
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:18px;
+      box-shadow:var(--shadow);
+      margin:16px 0;
+    }
+    .grid{
+      display:grid;
+      gap:14px;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    }
+    figure{
+      margin:0;
+      background:#0f1322;
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:hidden;
+    }
+    figure img{display:block;width:100%;height:auto}
+    figure figcaption{
+      padding:10px 12px;
+      font-size:14px;
+      color:var(--muted);
+      border-top:1px solid var(--border);
+      background:linear-gradient(180deg,#0f1322,#0e111b);
+    }
+    code, pre{
+      font-family:"Source Code Pro", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color:#e8f3ff;
+    }
+    pre{
+      background:#0b0f1a;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:16px;
+      overflow:auto;
+      box-shadow:var(--shadow);
+    }
+    .callout{
+      border-left:4px solid var(--accent);
+      padding:10px 14px;
+      background:rgba(122,162,255,.08);
+      border-radius:10px;
+      margin:12px 0;
+      color:#dfe7ff;
+    }
+    .tag{display:inline-block;background:rgba(0,209,178,.18);color:#b8fff1;border:1px solid rgba(0,209,178,.35);padding:2px 8px;border-radius:999px;font-size:12px;margin-right:6px}
+    .kpi{display:flex;gap:16px;flex-wrap:wrap;margin:10px 0 4px}
+    .kpi .pill{background:#101524;border:1px solid var(--border);border-radius:999px;padding:6px 10px;color:var(--muted)}
+    footer{color:var(--muted);text-align:center;margin:40px 0 20px}
+    hr{border:0;border-top:1px solid var(--border);margin:26px 0}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>CS180 Project 2: Fun With Filters And Frequencies</h1>
+      <div class="meta">Author: <strong>Sammie Smith</strong> &nbsp;•&nbsp; Semester: <strong>Fall 2025</strong></div>
+      <div class="kpi">
+        <span class="pill">Part 1: Fun With Filters</span>
+        <span class="pill">Part 2: Fun With Frequencies</span>
+      </div>
+    </header>
+
+    <section>
+      <h2>Part 1: Fun With Filters</h2>
+
+      <h3>Part 1.1: Convolutions From Scratch</h3>
+
+      <div class="panel">
+        <div class="callout"><span class="tag">Results</span>
+          Max Difference 4-Loop vs SciPy Convolution: <strong>7.105427357601002e-15</strong><br />
+          Max Difference 2-Loop vs SciPy Convolution: <strong>3.552713678800501e-15</strong>
+        </div>
+        <p>The 2-loop implementation runs much faster than 4-loops, and SciPy’s <code>convolve2d</code> runs the fastest. I used zero padding around images to handle borders. Zero padding can make responses near the edge darker because zeros get included in the convolution window.</p>
+      </div>
+
+      <h4>Code Snippets</h4>
+      <pre><code># Convolutions using 4 for loops (with padding &amp; 0 fill values)
+def convolution_four_loops(img, kernel):
+    kernel = np.flipud(np.fliplr(kernel))  # invert kernel for convolution
+    h, w = img.shape
+    kh, kw = kernel.shape
+    pad_h, pad_w = kh // 2, kw // 2
+
+    # pad with zeros
+    img_padded = np.pad(img, ((pad_h, pad_h), (pad_w, pad_w)), mode='constant')
+    output_img = np.zeros_like(img, dtype=float)
+
+    for i in range(h):
+        for j in range(w):
+            pixel_update = 0.0
+            for k in range(kh):
+                for l in range(kw):
+                    pixel_update += img_padded[i + k, j + l] * kernel[k, l]
+            output_img[i, j] = pixel_update
+    return output_img
+
+
+# Convolutions using 2 for loops (with padding &amp; 0 fill values)
+def convolution_two_loops(img, kernel):
+    kernel = np.flipud(np.fliplr(kernel))
+    h, w = img.shape
+    kh, kw = kernel.shape
+    pad_h, pad_w = kh // 2, kw // 2
+
+    # pad with zeros
+    img_padded = np.pad(img, ((pad_h, pad_h), (pad_w, pad_w)), mode='constant')
+    output_img = np.zeros_like(img, dtype=float)
+
+    for i in range(h):
+        for j in range(w):
+            overlapping_patch = img_padded[i:i+kh, j:j+kw]
+            output_img[i, j] = np.sum(overlapping_patch * kernel)
+    return output_img
+
+
+# Compare with SciPy convolve on a dummy image
+from scipy.signal import convolve2d
+
+image = np.random.randn(64, 64)
+kernel = np.array([[1, 2, 1],
+                   [2, 4, 2],
+                   [1, 2, 1]])  # smoothing filter
+
+out_4 = convolution_four_loops(image, kernel)
+out_2 = convolution_two_loops(image, kernel)
+out_scipy = convolve2d(image, kernel, mode='same', boundary='fill', fillvalue=0)
+
+print("Part 1.1: Comparing convolution implementations...")
+print("Max difference 4-loop vs SciPy convolution:", np.abs(out_4 - out_scipy).max())
+print("Max difference 2-loop vs SciPy convolution:", np.abs(out_2 - out_scipy).max())</code></pre>
+
+      <div class="grid">
+        <figure>
+          <img src="data/selfie.jpg" alt="Plain Selfie" />
+          <figcaption>Plain Selfie — <code>data/selfie.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_1/selfie_box.jpg" alt="Selfie Convolved With Box Filter" />
+          <figcaption>Selfie Convolved With Box Filter — <code>data/part_1_1/selfie_box.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_1/selfie_dx.jpg" alt="Selfie Dx Gradients" />
+          <figcaption>Selfie Dx Gradients — <code>data/part_1_1/selfie_dx.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_1/selfie_dy.jpg" alt="Selfie Dy Gradients" />
+          <figcaption>Selfie Dy Gradients — <code>data/part_1_1/selfie_dx.jpg</code></figcaption>
+        </figure>
+      </div>
+
+      <hr />
+
+      <h3>Part 1.2: Finite Difference Operator</h3>
+      <div class="panel">
+        <p>When choosing the right threshold, I started by examining orders of magnitude. Threshold = 1 captured no edges. Threshold = 0.01 captured too many edges. Threshold = 0.1 still did not capture enough edges. When I decreased to 0.09–0.05, grass texture interfered with the camera legs. I settled on threshold = 0.1 as the best trade-off.</p>
+      </div>
+
+      <div class="grid">
+        <figure>
+          <img src="data/cameraman.jpg" alt="Plain Cameraman" />
+          <figcaption>Plain Cameraman — <code>data/cameraman.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_2/cameraman_dx.jpg" alt="Cameraman Dx Gradients" />
+          <figcaption>Cameraman Dx Gradients — <code>data/part_1_2/cameraman_dx.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_2/cameraman_dy.jpg" alt="Cameraman Dy Gradients" />
+          <figcaption>Cameraman Dy Gradients — <code>data/part_1_2/cameraman_dy.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_2/cameraman_gradient_magnitude.jpg" alt="Cameraman Gradient Magnitude" />
+          <figcaption>Cameraman Gradient Magnitude — <code>data/part_1_2/cameraman_gradient_magnitude.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_2/cameraman_edge.jpg" alt="Cameraman Edge Map" />
+          <figcaption>Cameraman Edge Map — <code>data/part_1_2/cameraman_edge.jpg</code></figcaption>
+        </figure>
+      </div>
+
+      <hr />
+
+      <h3>Part 1.3: Derivative Of Gaussian Filter</h3>
+      <p>Comparing the 2D Gaussian versus Difference-of-Gaussians (DoG): visually the dx/dy versus DoGx/DoGy results are similar, and gradient magnitudes look close. Using the same threshold = 0.1, the DoG edge map removes a bit more noise and border artifacts.</p>
+
+      <div class="grid">
+        <figure>
+          <img src="data/part_1_3/cameraman_gaussian.jpg" alt="Cameraman Gaussian Filter" />
+          <figcaption>Cameraman Gaussian Filter — <code>data/part_1_3/cameraman_gaussian.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_3/DoGx_filter.jpg" alt="DoGx Filter" />
+          <figcaption>DoGx Filter — <code>data/part_1_3/DoGx_filter.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_3/DoGy_filter.jpg" alt="DoGy Filter" />
+          <figcaption>DoGy Filter — <code>data/part_1_3/DoGy_filter.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_3/cameraman_dogx.jpg" alt="Cameraman DoGx Results" />
+          <figcaption>Cameraman DoGx Results — <code>data/part_1_3/cameraman_dogx.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_3/cameraman_dogy.jpg" alt="Cameraman DoGy Results" />
+          <figcaption>Cameraman DoGy Results — <code>data/part_1_3/cameraman_dogy.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_3/cameraman_dx_smooth.jpg" alt="Cameraman Smooth Dx" />
+          <figcaption>Cameraman Smooth Dx — <code>data/part_1_3/cameraman_dx_smooth.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_3/cameraman_dy_smooth.jpg" alt="Cameraman Smooth Dy" />
+          <figcaption>Cameraman Smooth Dy — <code>data/part_1_3/cameraman_dy_smooth.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_3/cameraman_gradient_magnitude_smooth.jpg" alt="Smooth Gradient Magnitude" />
+          <figcaption>Smooth Gradient Magnitude — <code>data/part_1_3/cameraman_gradient_magnitude_smooth.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_3/cameraman_gradient_magnitude_dog.jpg" alt="DoG Gradient Magnitude" />
+          <figcaption>DoG Gradient Magnitude — <code>data/part_1_3/cameraman_gradient_magnitude_dog.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_3/cameraman_edge_smooth.jpg" alt="Smooth Gradient Edge Map" />
+          <figcaption>Smooth Gradient Edge Map — <code>data/part_1_3/cameraman_edge_smooth.jpg</code></figcaption>
+        </figure>
+        <figure>
+          <img src="data/part_1_3/cameraman_edge_dog.jpg" alt="DoG Edge Map" />
+          <figcaption>DoG Edge Map — <code>data/part_1_3/cameraman_edge_dog.jpg</code></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>Part 2: Fun With Frequencies</h2>
+
+      <h3>Part 2.1: Image Sharpening</h3>
+      <p>Taj mahal photo is smaller and higher contrast than my photo of me and my friend. Thus the gaussian blur of the Taj mahal seems much blurrier (since the kernel is proportionally larger to the image array). This means that the difference between the unmodified images and their gaussian blurs is much larger for Taj mahal than my photo. You can see this as more details in the high-frequency images.
+This difference carries through when I use the high frequency images with an image unsharp mask (original image + alpha * high frequency image). I experimented with alpha=[0.5, 1.0, 1.5, 2.0].
+The Taj mahal looks worse with large sharpening (alpha=2.0) as already defined edges (like the trees) become super pixelated. This is because the high frequency image is weighted too much, and the edges are too strong. To my eyes, the ideal alpha for this is 1.0.
+My photo looks better however with large sharpening (alpha=2.0) since there are fewer edges in the original image and because the original image has lower contrast. It really benefits from more weight on the high-frequency image… so you can now see the sweat on our faces and crumbs on our shirts.
+</p>
+
+      <h4>Taj Mahal</h4>
+      <div class="grid">
+        <figure><img src="data/part_2_1/gaussian_taj.jpg" alt="Lowpass Taj" /><figcaption>Lowpass — <code>data/part_2_1/gaussian_taj.jpg</code></figcaption></figure>
+        <figure><img src="data/part_2_1/highfreq_taj.jpg" alt="Highpass Taj" /><figcaption>Highpass — <code>data/part_2_1/highfreq_taj.jpg</code></figcaption></figure>
+        <figure><img src="data/part_2_1/sharpened_alpha0.5_taj.jpg" alt="Sharpened Taj 0.5" /><figcaption>Sharpened α=0.5 — <code>data/part_2_1/sharpened_alpha0.5_taj.jpg</code></figcaption></figure>
+        <figure><img src="data/part_2_1/sharpened_alpha1.0_taj.jpg" alt="Sharpened Taj 1.0" /><figcaption>Sharpened α=1.0 — <code>data/part_2_1/sharpened_alpha1.0_taj.jpg</code></figcaption></figure>
+        <figure><img src="data/part_2_1/sharpened_alpha1.5_taj.jpg" alt="Sharpened Taj 1.5" /><figcaption>Sharpened α=1.5 — <code>data/part_2_1/sharpened_alpha1.5_taj.jpg</code></figcaption></figure>
+        <figure><img src="data/part_2_1/sharpened_alpha2.0_taj.jpg" alt="Sharpened Taj 2.0" /><figcaption>Sharpened α=2.0 — <code>data/part_2_1/sharpened_alpha2.0_taj.jpg</code></figcaption></figure>
+      </div>
+
+      <h4>Emilee</h4>
+      <div class="grid">
+        <figure><img src="data/part_2_1/gaussian_emilee.jpg" alt="Lowpass Emilee" /><figcaption>Lowpass — <code>data/part_2_1/gaussian_emilee.jpg</code></figcaption></figure>
+        <figure><img src="data/part_2_1/highfreq_emilee.jpg" alt="Highpass Emilee" /><figcaption>Highpass — <code>data/part_2_1/highfreq_emilee.jpg</code></figcaption></figure>
+        <figure><img src="data/part_2_1/sharpened_alpha0.5_emilee.jpg" alt="Sharpened Emilee 0.5" /><figcaption>Sharpened α=0.5 — <code>data/part_2_1/sharpened_alpha0.5_emilee.jpg</code></figcaption></figure>
+        <figure><img src="data/part_2_1/sharpened_alpha1.0_emilee.jpg" alt="Sharpened Emilee 1.0" /><figcaption>Sharpened α=1.0 — <code>data/part_2_1/sharpened_alpha1.0_emilee.jpg</code></figcaption></figure>
+        <figure><img src="data/part_2_1/sharpened_alpha1.5_emilee.jpg" alt="Sharpened Emilee 1.5" /><figcaption>Sharpened α=1.5 — <code>data/part_2_1/sharpened_alpha1.5_emilee.jpg</code></figcaption></figure>
+        <figure><img src="data/part_2_1/sharpened_alpha2.0_emilee.jpg" alt="Sharpened Emilee 2.0" /><figcaption>Sharpened α=2.0 — <code>data/part_2_1/sharpened_alpha2.0_emilee.jpg</code></figcaption></figure>
+      </div>
+
+      <div class="panel">
+        <p>Interestingly, when I started with a high resolution image of Emilee and I, you could not see any effect of sharpening. But when I reduced the resolution to about the same as the Taj Mahal image, the same alpha then worked!</p>
+      </div>
+
+      <hr />
+
+      <h3>Part 2.2: Hybrid Images</h3>
+      <p>Hybrid images feel uncanny: from close, high frequencies dominate; from far, low frequencies dominate.</p>
+
+      <div class="grid">
+        <figure><img src="data/hybrid_image_derek_nutmeg.jpg" alt="Derek-Nutmeg Hybrid" /><figcaption>Derek-Nutmeg — <code>data/hybrid_image_derek_nutmeg.jpg</code></figcaption></figure>
+        <figure><img src="data/hybridadrian2_sammie.jpg" alt="Sammie-Adrian Hybrid" /><figcaption>Sammie-Adrian — <code>data/hybridadrian2_sammie.jpg</code></figcaption></figure>
+        <figure><img src="data/sammie1.jpg" alt="Sammie Source" /><figcaption>Sammie Source — <code>data/sammie1.jpg</code></figcaption></figure>
+        <figure><img src="data/adrian2.jpg" alt="Adrian Source" /><figcaption>Adrian Source — <code>data/adrian2.jpg</code></figcaption></figure>
+        <figure><img src="data/hybrid_mona_caledonia.jpg" alt="Mona-Caledonia Hybrid" /><figcaption>Mona-Caledonia — <code>data/hybrid_mona_caledonia.jpg</code></figcaption></figure>
+      </div>
+      <div class="panel">
+        <p>Derek-Nutmeg: From close up you see a cat. From far away you see a man. Forget Batman. Catman’s gotchur back…. erm I mean watch your back. <br>
+
+Sammie-Adrian: From close up you see a woman (me), from far away you see a man (my boyfriend). You can tell we have similar shaped eyes, but very different noses and jawlines, resulting in poor alignment of the lower face (even when aligned on the mouth and nose).
+<br>
+Mona-Caledonia: Observe the Mona-Lisa effect on my housemate, Caledonia. From close up, she is unsmiling and looking away from you. From far away (10-20ft), she’s looking directly at you and smiling.
+Consider image 1 as the high-frequency version, and image 2 as the low frequency version.
+      </div>
+
+      <div class="panel">
+        <p>I slightly modified my original hybrid approach to include some low frequencies from image 1:</p>
+        <p><code>hybrid = α · high_pass(img1) + β · low_pass(img1) + ζ · low_pass(img2)</code></p>
+        <p>Best hyperparameters (empirical):</p>
+        <ul>
+          <li>Derek-Nutmeg: α = 1, β = 0.3, ζ = 1</li>
+          <li>Sammie-Adrian: α = 1.5, β = 0.3, ζ = 0.5</li>
+          <li>Mona-Caledonia: α = 1.5, β = 0.3, ζ = 0.5</li>
+        </ul>
+        <p>The same hyperparameters worked best on both Sammie-Adrian and Mona-Caledonia probably because they were taken in the same lighting, same distance, same zoom, same camera.</p>
+      </div>
+
+      <h4>Mona-Caledonia Fourier Transforms</h4>
+      <div class="grid">
+        <figure><img src="data/caledonia_frown.jpg" alt="Caledonia Frowning (Original)" /><figcaption>Image 1 (High Frequency) — <code>data/caledonia_frown.jpeg</code></figcaption></figure>
+        <figure><img src="data/highfreq_fft_magnitudecaledonia_frown.jpg" alt="FFT Magnitude (Frown)" /><figcaption>FFT Magnitude (Frown) — <code>data/highfreq_fft_magnitudecaledonia_frown.jpeg</code></figcaption></figure>
+        <figure><img src="data/lowfreq_fft_magnitudecaledonia_smile.jpg" alt="FFT Magnitude (Smile)" /><figcaption>FFT Magnitude (Smile) — <code>data/lowfreq_fft_magnitudecaledonia_smile.jpeg</code></figcaption></figure>
+        <figure><img src="data/caledonia_smile.jpg" alt="Caledonia Smiling (Repeat For Context)" /><figcaption>Image 2 (Low Frequency) — <code>data/caledonia_frown.jpeg</code></figcaption></figure>
+        <figure><img src="data/hybrid_fft_magnitude_mona_caledonia.jpg" alt="Hybrid FFT Magnitude" /><figcaption>Hybrid FFT Magnitude — <code>data/hybrid_fft_magnitude_mona_caledonia.jpg</code></figcaption></figure>
+      </div>
+
+      <div class="panel">
+        <p>It makes sense that both Fourier transforms look similar, as the input images are (intentionally) very similar.</p>
+      </div>
+
+      <hr />
+
+      <h3>Part 2.3: Gaussian And Laplacian Stacks Of Orapple</h3>
+      <figure class="panel">
+        <img src="data/part_2_3/oraple_laplacian_stack.png" alt="Orapple Laplacian Stack" />
+        <figcaption>Orapple Laplacian Stack — <code>data/part_2_3/oraple_laplacian_stack.png</code></figcaption>
+      </figure>
+
+      <hr />
+
+      <h3>Part 2.4: Multi-Resolution Blending</h3>
+      <h4>Orapple Blend</h4>
+      <div class="grid">
+        <figure><img src="data/apple.jpeg" alt="Apple" /><figcaption>Apple — <code>data/apple.jpeg</code></figcaption></figure>
+        <figure><img src="data/orange.jpeg" alt="Orange" /><figcaption>Orange — <code>data/orange.jpeg</code></figcaption></figure>
+        <figure><img src="data/part_2_4/final_blend_oraple.png" alt="Final Orapple Blend" /><figcaption>Final Orapple Blend — <code>data/part_2_4/final_blend_oraple.png</code></figcaption></figure>
+      </div>
+
+      <h4>Third Eye Adrian Blend</h4>
+      <div class="grid">
+        <figure><img src="data/adrian2.jpg" alt="Adrian" /><figcaption>Adrian — <code>data/adrian2.jpg</code></figcaption></figure>
+        <figure><img src="data/eye.jpg" alt="Eye" /><figcaption>Eye — <code>data/eye.jpg</code></figcaption></figure>
+        <figure><img src="data/part_2_4/final_blend_adrian_oracle.png" alt="Final Third Eye Blend" /><figcaption>Final Third Eye Blend — <code>data/part_2_4/final_blend_adrian_oracle.png</code></figcaption></figure>
+      </div>
+
+      <div class="grid">
+        <figure class="panel">
+          <img src="data/part_2_4/adrian_oracle_laplacian_stack.png" alt="Third Eye Laplacian Stack" />
+          <figcaption>Third Eye Laplacian Stack — <code>data/part_2_4/adrian_oracle_laplacian_stack.png</code></figcaption>
+        </figure>
+      </div>
+
+      <h4>Mona-Caledonia Pt2 Blend</h4>
+      <div class="grid">
+        <figure><img src="data/mona_lisa.jpg" alt="Mona Lisa" /><figcaption>Mona Lisa — <code>data/mona_lisa.jpg</code></figcaption></figure>
+        <figure><img src="data/caledonia_mona_face.jpg" alt="Caledonia Mona Face" /><figcaption>Caledonia Mona Face — <code>data/caledonia_mona_face.jpg</code></figcaption></figure>
+        <figure><img src="data/part_2_4/final_blend_mona_caledonia.png" alt="Final Mona-Caledonia Blend" /><figcaption>Final Mona-Caledonia Blend — <code>data/part_2_4/final_blend_mona_caledonia.png</code></figcaption></figure>
+      </div>
+    </section>
+
+    <footer>
+      © 2025 Sammie Smith · CS180 Project 2
+    </footer>
+  </div>
+</body>
+</html>

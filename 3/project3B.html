@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS180 Project 3B — Sammie Smith</title>
+<style>
+  body {
+    font-family: "Inter", Arial, sans-serif;
+    line-height: 1.6;
+    margin: 40px auto;
+    max-width: 950px;
+    background-color: #fafafa;
+    color: #222;
+  }
+  h1, h2, h3, h4 {
+    color: #003262;
+  }
+  img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 10px 0;
+    display: block;
+  }
+  pre, code {
+    background-color: #f4f4f4;
+    padding: 10px;
+    border-radius: 6px;
+    font-family: monospace;
+    display: block;
+    overflow-x: auto;
+  }
+  a {
+    color: #0057B8;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  .section {
+    margin-bottom: 40px;
+  }
+  /* Navigation */
+  .nav {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+  .nav a {
+    background-color: #003262;
+    color: white;
+    padding: 10px 20px;
+    margin: 0 5px;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  .nav a.active {
+    background-color: #FDB515;
+    color: #003262;
+    font-weight: bold;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- Navigation Bar -->
+<div class="nav">
+  <a href="index.html">Project 3A</a>
+  <a href="project3B.html" class="active">Project 3B</a>
+</div>
+
+<h1>CS180 Project 3B</h1>
+
+<!-- ========== Task B1 ========== -->
+<div class="section">
+  <h2>Task B1: Harris Corner Detection</h2>
+  <p>Red dots are where corners were identified.</p>
+  <h4>Corner Detection with Harris</h4>
+  <img src="./data/C1_harris.jpeg" alt="Harris Corner Detection">
+  <h4>Corner Detection with Harris + ANMS</h4>
+  <img src="./data/C1_anms.jpeg" alt="Harris + ANMS">
+</div>
+
+<!-- ========== Task B2 ========== -->
+<div class="section">
+  <h2>Task B2: Feature Descriptor Extraction</h2>
+  <p>At first, I implemented the feature descriptor extraction algorithm as we were instructed:</p>
+  <p>I first blurred the image with a gaussian filter to reduce aliasing before downsampling. Then, for every pixel in the image, I looked at a 40x40 pixel window around the pixel. I then took every 5th pixel in vertical and horizontal directions, resulting in a bunch of 8x8 descriptors. </p>
+
+  <p>But, the descriptors looked closer to random noise than edge detectors. From what I know about CNNs, features that get learned look like edge detectors. And learned features are the best based off of some loss function. So I figured that it would probably be a good idea to get my descriptors to look more like edge detectors since I knew I was going to have to perform some kind of least squares loss on finding the best correspondences in RANSAC. </p>
+  <p>My improved extraction algorithm doesn’t assume that pixels are one whole unit each (integers). It assumes a pixel is a continuous space. Since I can’t index [0.5, 0.5] in arrays, I used scipy’s map_coordinates to perform bilinear interpolation to sample floating point (x, y) locations. This fixes the “pixel as one unit” rounding issue and results in less noise in my features!</p>
+  <h4>Extraction (Top) and Improved Extraction (Bottom)</h4>
+  <img src="./data/feature_descriptors_naive.jpeg" alt="Naive Descriptors">
+  <img src="./data/feature_descriptors.jpeg" alt="Improved Descriptors">
+</div>
+
+<!-- ========== Task B3 ========== -->
+<div class="section">
+  <h2>Task B3: Feature Matching</h2>
+  <p>At first I implemented a feature matching algorithm that used double for loops. But this took a very long time to run, so I decided to somewhat vectorize it.</p>
+  <p>My implementation iterates through every descriptor in the first image and calculates the Euclidean distance from it to every descriptor in the second image (represented as a vector) using the L2 norm. Then, I choose the smallest and second smallest distances (1NN, 2NN). I assume that they must signal correspondences, as they are the best feature matches between any two points in both images. Finally, I apply Lowe’s ratio test to see how much better the best match is than the second best match. MOPs paper said that if they are close, then the feature is ambiguous and we should discard it, otherwise it’s useful.</p>
+  <p>See visualization of feature matches below:</p>
+  <img src="./data/A_feature_matches.jpeg" alt="A Matches">
+  <img src="./data/B_feature_matches.jpeg" alt="B Matches">
+  <img src="./data/C_feature_matches.jpeg" alt="C Matches">
+</div>
+
+<!-- ========== Task B4 ========== -->
+<div class="section">
+  <h2>Task B4: RANSAC for Robust Homography</h2>
+  <p>As someone who loves the beauty of Least Squares, I have to say… this was a pretty fun algorithm to implement.</p>
+  <p>I implemented RANSAC as follows: For every iteration (a hyperparameter I set to 2000), I sampled 4 correspondences (to satisfy 8 degrees of freedom needed to calculate the homography) and computed the homography from my first image to my second. Then I projected all points in my first image using the homography. I calculated the error of projection using the L2 norm, then identified inliers as points whose errors were under some threshold (a hyperparameter I set to 3.0). I chose the final homography as the one that produced the most inliers across all iterations of the algorithm. </p>
+  <p>I ran into a few difficulties while coding this (a lot less fun). The provided Harris function gave me points as (y,x) but my RANSAC algorithm assumed (x,y). When I finally figured this out, I simply converted (y,x) to (x,y) while computing the homography and projections so I wouldn’t have to change my RANSAC algorithm. In part A, my mosaic stitched my second image onto my first image, but in RANSAC I computed my homography from my first image to my second image, so I rewrote my stitching code accordingly.</p>
+  <h4>Improvements from hand stitching to autostitching</h4>
+  <ul>
+    <li><strong>Diversity in Correspondences:</strong>Correspondences that the algorithm picked were ones that I couldn’t see clearly. For example, I chose corners of buildings but with feature matching, correspondences could be BOTH corners of buildings but also places where tree branches branch off. This results in a more even distribution of correspondences, and a cleaner stitch. 
+</li>
+    <li><strong>Number & Accuracy of Correspondences:</strong> Obviously, automatic feature matching from Harris correspondences results in way more correspondences than I had the patience to manually select. Not to mention, correspondences were more accurate when automatically chosen. This resulted in images being lined up better. 
+</li>
+  </ul>
+  <h4>Improvements from Part A to Part B (blending)</h4>
+  <p>In part A, I was running out of time, so I implemented a naive masking system to blend my images.I simply blended the edges at the overlap, but there were still some pretty visible edge artifacts.
+ In part B, I feather my masks to be most intense at the center and dissipate toward the edges (calculated by the furthest edge). This resulted in a much smoother blend and removed harsh seams.
+
+</p>
+  <img src="./data/A_mosaic.jpeg" alt="A Hand Mosaic">
+  <img src="./data/A_auto_mosaic.jpeg" alt="A Auto Mosaic">
+  <img src="./data/B_mosaic.jpeg" alt="B Hand Mosaic">
+  <img src="./data/B_auto_mosaic.jpeg" alt="B Auto Mosaic">
+  <img src="./data/C_mosaic.jpeg" alt="C Hand Mosaic">
+  <img src="./data/C_auto_mosaic.jpeg" alt="C Auto Mosaic">
+</div>
+
+</body>
+</html>
