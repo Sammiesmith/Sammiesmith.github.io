@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS 180 Project 5A: Diffusion Models</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            margin-bottom: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        h3 {
+            color: #764ba2;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .description {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .image-container {
+            text-align: center;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease;
+        }
+
+        .image-container img:hover {
+            transform: scale(1.05);
+        }
+
+        .caption {
+            margin-top: 10px;
+            font-style: italic;
+            color: #666;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .code-block {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .part-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .toc {
+            background: #e7eef9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .toc ul {
+            list-style-position: inside;
+            padding-left: 20px;
+        }
+
+        .toc li {
+            margin: 8px 0;
+        }
+
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            margin-top: 40px;
+        }
+
+        .slider-container {
+            margin: 20px 0;
+        }
+
+        .noise-level {
+            display: inline-block;
+            background: #764ba2;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CS 180 Project 5A</h1>
+            <p class="subtitle">Diffusion Models: From Noise to Images</p>
+            <p class="subtitle">Sammie Smith, Fall 2025</p>
+        </header>
+
+        <div class="nav">
+    <a href="partB.html">← Go to Part B</a>
+    </div>
+
+        <div class="section toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#part0">Part 0: Setup and Test Results</a></li>
+                <li><a href="#part1-1">Part 1.1: Forward Process</a></li>
+                <li><a href="#part1-2">Part 1.2: Classical Denoising</a></li>
+                <li><a href="#part1-3">Part 1.3: One-Step Denoising</a></li>
+                <li><a href="#part1-4">Part 1.4: Iterative Denoising</a></li>
+                <li><a href="#part1-5">Part 1.5: Diffusion Model Sampling</a></li>
+                <li><a href="#part1-6">Part 1.6: Classifier-Free Guidance</a></li>
+                <li><a href="#part1-7">Part 1.7: Image-to-Image Translation</a></li>
+                <li><a href="#part1-8">Part 1.8: Visual Anagrams</a></li>
+                <li><a href="#part1-9">Part 1.9: Hybrid Images</a></li>
+            </ul>
+        </div>
+
+        <!-- Part 0: Setup -->
+        <div class="section" id="part0">
+            <span class="part-number">Part 0</span>
+            <h2>Setup and Test Results</h2>
+            <div class="description">
+                <p><strong>Implementation:</strong> This project uses the <strong>DeepFloyd IF</strong> diffusion model, a two-stage model by Stability AI. Stage 1 generates 64×64 images, and Stage 2 upsamples to 256×256. The model works by converting text prompts into high-dimensional embeddings (4096 dimensions) that guide the image generation process.</p>
+            </div>
+            <h3>Seed = 180  ;)</h3>
+            <h3>Sample Text-to-Image Results</h3>
+            <p>Here are three prompts:</p>
+            
+            <div class="image-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_1_img_1.jpg" alt="Prompt 1 Result">
+                    <p class="caption">Results using 20 inference steps</p>
+                </div>
+            </div>
+
+            <div class="image-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_1_img_2.jpg" alt="Prompt 1 Result">
+                    <p class="caption">Results using 100 inference steps</p>
+                </div>
+            </div>
+
+            <p>Observations: A larger number of inference steps is supposed to yield better quality. This is not necessarily the case here; it depends on how you define quality. With more steps, the model seems to lose sight of the original prompt: an eye becomes a Ferris wheel with vein-like spokes and two souls become one. More steps, does however, lead to much more detailed images.</p>
+
+        </div>
+
+        <!-- Part 1.1: Forward Process -->
+        <div class="section" id="part1-1">
+            <span class="part-number">Part 1.1</span>
+            <h2>Implementing the Forward Process</h2>
+            <div class="description">
+                <p><strong>How it works:</strong> The forward process adds Gaussian noise to a clean image according to a noise schedule. The alpha_t values come from the pre-defined noise schedule, which specifies how much signal is preserved at each forward diffusion timestep. The culmulative product of the alpha_ts represents the remaining fraction of the original image after repeadedly applying small gaussian noise steps.</p>
+
+                <p>This allows me to sample a noisy version of an image at any timestep t. I test this on the Campanile image at different noise levels (t = 250, 500, 750).</p>
+            </div>
+            
+            <h3>Noisy Campanile at Different Timesteps</h3>
+            <div class="comparison-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_1_img_3.jpg" alt="Original">
+                    <p class="caption">Original Image</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 1.2: Classical Denoising -->
+        <div class="section" id="part1-2">
+            <span class="part-number">Part 1.2</span>
+            <h2>Classical Denoising</h2>
+            <div class="description">
+                <p><strong>How it works:</strong> This section attempts to denoise the noisy images using classical Gaussian blur filtering. This method simply applies a Gaussian blur to smooth out noise. Unsurprisingly, this method struggles significantly with heavily noised images and cannot recover meaningful details.</p>
+                <p>Also, a larger kernel results in a stronger blur, which results in poor denoising (see results for kernel 7). Similarly, too small of a kernel results in poor denoising because too much noise is left over (see kernel size 3)</p>
+            </div>
+            
+            <h3>Gaussian Blur Denoising Results</h3>
+            <div class="comparison-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_2_img_1.jpg" alt="Noisy t=250">
+                    <p class="caption">Noisy and Denoised Images at (t=250, 500, 75) with kernel of size 3</p>
+                </div>
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_2_img_2.jpg" alt="Denoised t=250">
+                    <p class="caption">Noisy and Denoised Images at (t=250, 500, 75) with kernel of size 5</p>
+                </div>
+         
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_2_img_3.jpg" alt="Denoised t=250">
+                    <p class="caption">Noisy and Denoised Images at (t=250, 500, 75) with kernel of size 7</p>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 1.3: One-Step Denoising -->
+        <div class="section" id="part1-3">
+            <span class="part-number">Part 1.3</span>
+            <h2>One-Step Denoising with Pretrained UNet</h2>
+            <div class="description">
+                <p><strong>How it works:</strong> The pretrained UNet denoiser estimates the noise added to the image and removes it in a single step. The UNet was trained on millions of (x<sub>0</sub>, x<sub>t</sub>) pairs and learns to predict noise conditioned on the timestep t.</p>
+                <p>This works much better than Gaussian blur, especially at lower noise levels, because it projects images back onto the natural image manifold. Gaussian denoising just blurs the noise, with no gaurrantee of ensuring the image is in the natural image manifold</p>
+            </div>
+            
+            <h3>One-Step UNet Denoising Results</h3>
+            <div class="comparison-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_3_img.jpg" alt="">
+                    <p class="caption"><span class="noise-level">Noisy images vs One Step Denoised images at t=250,500,700</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 1.4: Iterative Denoising -->
+        <div class="section" id="part1-4">
+            <span class="part-number">Part 1.4</span>
+            <h2>Iterative Denoising</h2>
+            <div class="description">
+                <p><strong>How it works:</strong> Instead of denoising in one giant step, iterative denoising removes noise gradually over multiple steps. Starting from a noisy image at timestep t, I:</p>
+                <ol style="margin-left: 30px; margin-top: 10px;">
+                    <li>Estimate the noise using the UNet</li>
+                    <li>Remove some of the noise to get x<sub>t-1</sub></li>
+                    <li>Add a small amount of random noise back (except at the final step)</li>
+                    <li>Repeat until I reach t=0</li>
+                </ol>
+                <p style="margin-top: 10px;">I use strided timesteps (990, 960, 930... 30, 0) with steps of 30 for efficiency. This iterative approach produces significantly better results than one-step denoising.</p>
+            </div>
+            
+            <h3>Comparison of Iterative Denoising Results to Previous Methods</h3>
+            <div class="comparison-grid">
+                
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_4_img_2.jpg" alt="Iterative t=500">
+                    <br>Observation:  Iterative denoising recreates the most detail. However, the overall shape of the Campanilie is less accurate than one-step denoising result.
+</p>
+                </div>
+            </div>
+            
+            <h3>Denoising Trajectory (t=690)</h3>
+            <p>Evolution of the image through the denoising process:</p>
+            <div class="image-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_4_img_1.jpg" alt="Iterative t=250">
+                    <p class="caption"><span class="noise-level">Campanile at every 5th denoising step</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 1.5: Diffusion Sampling -->
+        <div class="section" id="part1-5">
+            <span class="part-number">Part 1.5</span>
+            <h2>Diffusion Model Sampling</h2>
+            <div class="description">
+                <p><strong>How it works:</strong> I generate entirely new images from scratch by starting with pure random noise (from a Gaussian distribution) and iteratively denoising it using the prompt "a high quality photo". This effectively "forces" random noise onto the manifold of natural images through the denoising process.</p>
+            </div>
+            
+            <h3>Generated Images from Random Noise</h3>
+            <div class="image-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_5_img.jpg" alt="Sample 1">
+                    <p class="caption">This was super cool! You can kinda see a couple of landscapes with some mountains, trees, and bodies of water. One sample also displays a man thinking. Pretty creepy & surreal... doesn't seem like it's fully on the natural manifold.</p>
+                </div>
+               
+            </div>
+        </div>
+
+        <!-- Part 1.6: CFG -->
+        <div class="section" id="part1-6">
+            <span class="part-number">Part 1.6</span>
+            <h2>Classifier-Free Guidance (CFG)</h2>
+            <div class="description">
+                <p><strong>How it works:</strong> CFG greatly improves image quality by computing both a conditional noise estimate (with prompt) and unconditional estimate (empty prompt).</p>
+                <p>The formula is a weighted sum of the conditional noise estimate and difference between conditional noise estimate and unconditional noise estimate scaled by some gamma. Gamma is the guidance scale (typically 7). This amplifies the effect of the text conditioning, producing images that are more aligned with the prompt and of higher quality, though with reduced diversity.</p>
+            </div>
+            
+            <h3>CFG Results with Different Prompts</h3>
+            <div class="image-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_6_img.jpg" alt="CFG Result 1">
+                    <p class="caption">Prompt: "a high quality photo"</p>
+                    <p>The problem spec said that using CFG comes at a cost of reduced image diversity. We can see that here: all images are of humans.They are more realistic and less surreal. They are much more detailed.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 1.7: Image-to-Image -->
+        <div class="section" id="part1-7">
+            <span class="part-number">Part 1.7</span>
+            <h2>Image-to-Image Translation</h2>
+            <div class="description">
+                <p><strong>How it works:</strong> By adding noise to a real image and then denoising it, I edit existing images. The amount of noise controls the degree of editing: more noise allows for more creative changes. The model projects the noisy image back onto the natural image manifold, necessarily hallucinating or creating new content in the process.</p>
+            </div>
+            
+            <h3>SDEdits at Various Noise Levels</h3>
+            <p>Campanile, Using prompt: "a high quality photo"</p>
+            <div class="image-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_7_oops_img1.jpg" alt="">
+                    <p class="caption">Noise Levels =  [1,3,5,7,10,20]</p>
+                </div>
+            </div>
+            <p>Surfer at sunset, Using prompt: "a high quality photo"</p>
+            <div class="image-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_7_oops_img2.jpg" alt="">
+                    <p class="caption">Noise Levels =  [1,3,5,7,10,20]</p>
+                </div>
+            </div>
+            <p>Kim Jong [Dad] (see context in inpainting section lol), Using prompt: "a high quality photo"</p>
+            <div class="image-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_7_oops_img3.jpg" alt="">
+                    <p class="caption">Noise Levels =  [1,3,5,7,10,20]</p>
+                </div>
+            </div>
+
+            <h3>Hand-Drawn and Web Images</h3>
+            <p>Projecting non-realistic images onto the natural image manifold:</p>
+            <div class="comparison-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_7_img1.jpg" alt="Web Image Input">
+                    <p class="caption">Input Image</p>
+                </div>
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_7_img2.jpg" alt="Web Image Output">
+                    <p class="caption">Generated Output</p>
+                </div>
+            </div>
+            <div class="comparison-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_7_img3.jpg" alt="Drawing Input">
+                    <p class="caption">Hand-drawn Input</p>
+                </div>
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_7_img4.jpg" alt="Drawing Output">
+                    <p class="caption">Generated Output</p>
+                </div>
+                
+            </div>
+            <p>You can see how iteration 7 picks up on the curved lines in my drawing, and how iteration 10 has a ball by the horse’s head that becomes the star.</p>
+                        <div class="comparison-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_7_img5.jpg" alt="Drawing Input">
+                    <p class="caption">Hand-drawn Input</p>
+                </div>
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_7_img6.jpg" alt="Drawing Output">
+                    <p class="caption">Generated Output</p>
+                </div>
+            </div>
+            <p>You can see how by iteration 3, there is some notion of ocean. In iteration 7 and 10, you can see radial straitions appear in the swans’ heads and the flower petal that eventually become the sun’s rays.</p>
+
+
+            <h3>Inpainting</h3>
+            <div class="description">
+                <p><strong>How it works:</strong> Following the RePaint paper, I fill in masked regions of an image. At each denoising step, I force the unmasked pixels to match the original image while letting the masked region be generated freely. </p>
+            </div>
+          
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_7_2_img1.jpg" alt="Original">
+                    <p class="caption">Mask</p>
+                </div>
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_7_2_img2.jpg" alt="Mask">
+                    <p class="caption">Inpainted Results</p>
+                </div>
+           <p>… the Campanile is now a woman</p>
+
+           <p>Here are the results on a couple of my own images!</p>
+
+           <p>My Dad and I have a running joke where he sarcastically compares himself to the dictator of North Korea when he ‘so cruelly’ reminds me to unload the dishwasher. He made this meme of himself that I will exploit.</p>
+
+        <div class="image-container">
+            <img src="partA_outputs/part_1_7_2_img3.jpg" alt="Original">
+            <p class="caption">Mask</p>
+        </div>
+        <div class="image-container">
+            <img src="partA_outputs/part_1_7_2_img4.jpg" alt="Mask">
+            <p class="caption">Inpainted Results</p>
+        </div>
+
+        <p>I love this result, very surreal! It gives big brother 1984 vibes.</p>
+
+        <p>In this image of a surfer at sunset, I mask out the sky.</p>
+
+                <div class="image-container">
+            <img src="partA_outputs/part_1_7_2_img5.jpg" alt="Original">
+            <p class="caption">Mask</p>
+        </div>
+        <div class="image-container">
+            <img src="partA_outputs/part_1_7_2_img6.jpg" alt="Mask">
+            <p class="caption">Inpainted Results</p>
+        </div>
+
+        <p>It’s very bizarre. With out any prompt, the model fills in the sky with an image of a woman mediating.</p>
+            
+
+
+            <h3>Text-Conditioned Image-to-Image</h3>
+            <p>I had a lot more fun with this section. It was silly to find things to fill in. Across the board, results seem to devolve at scale=20, interestingly.
+"</p>
+<p>Here’s the Campanile filled in with "a sun palace in the clouds". Scale=1 and Scale=7 are my favorite results. </p>
+            <div class="image-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_7_3_img1.jpg" alt="Text i2i 1">
+                </div>
+                 </div>
+            <div class="image-grid"></div>
+                <p>Here’s Kim Jong Dad’s face filled in with “a  sad drooling infant head”. The result for scale=5 is a personal favorite, with scale=3 coming in as a close second.</p>
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_7_3_img2.jpg" alt="Text i2i 1">
+                </div>
+                                 
+            <div class="image-grid"></div>
+                <p>Here’s the surfer’s sunset view filled in with "a turtle swimming in liquid gold”. I like scale=5 the best.</p>
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_7_3_img3.jpg" alt="Text i2i 1">
+                </div>
+                
+            </div>
+        </div>
+        </div>
+
+        <!-- Part 1.8: Visual Anagrams -->
+        <div class="section" id="part1-8">
+            <span class="part-number">Part 1.8</span>
+            <h2>Visual Anagrams</h2>
+            <div class="description">
+                <p><strong>How it works:</strong> I create optical illusions where an image appears as one thing normally, but reveals something completely different when flipped upside down. The algorithm:</p>
+                <ol style="margin-left: 30px; margin-top: 10px;">
+                    <li>Denoise with prompt p1 to get noise estimate e1</li>
+                    <li>Flip the image upside down</li>
+                    <li>Denoise with prompt p2 to get noise estimate e2</li>
+                    <li>Flip e2 back upright</li>
+                    <li>Use the average: e = (e1 + e2) / 2</li>
+                </ol>
+                <p style="margin-top: 10px;">This forces the model to satisfy both prompts simultaneously through different orientations.</p>
+            </div>
+            
+            <h3>Visual Anagram Results</h3>
+            <p>“A sad boy” vs “A happy boy”, scale = 3. You can see a smiling mustachioed man vs a screaming little boy
+ </p>
+           
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_8_img1.jpg" alt="">
+        
+                </div>
+            <p>“A sad boy” vs “A sad girl”, scale=5. I got really lucky and got this good of a result on the first try!</p>
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_8_img2.jpg" alt="Flipped view" style="transform: rotate(180deg);">
+                    
+                </div>
+            
+        </div>
+
+        <!-- Part 1.9: Hybrid Images -->
+        <div class="section" id="part1-9">
+            <span class="part-number">Part 1.9</span>
+            <h2>Hybrid Images</h2>
+            <div class="description">
+                <p><strong>How it works:</strong> Similar to Project 2, I create hybrid images but this time using diffusion models. I estimate noise with two different prompts, then combine low frequencies from the first noise estimate with high frequencies from the second</p>
+                <p>This creates an image that appears as one thing up close (high frequencies) and another when viewed from far away (low frequencies).</p>
+            </div>
+            
+            <h3>Hybrid Image Results</h3>
+            <p>Prompt 1 (low freq): "a frog" | Prompt 2 (high freq): "a cat"</p>
+            <div class="comparison-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_9_img1.jpg" alt="Hybrid image">
+                    <p class="caption">Hybrid Result<br> I got better results using sigma=1, This made the low frequencies stand out more to make the frog more visible.</p>
+                </div>
+            </div>
+            <p>Prompt 1 (low freq): "cats" | Prompt 2 (high freq): "water color flowers"</p>
+            <div class="comparison-grid">
+                <div class="image-container">
+                    <img src="partA_outputs/part_1_9_img2.jpg" alt="Hybrid image">
+                    <p class="caption">Hybrid Result<br> I had a lot of fun with this one, here are a few different versions! </p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>CS 180 Project 5A: The Power of Diffusion Models</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">Sammie Smith, Fall 2025</p>
+        </footer>
+    </div>
+</body>
+</html>

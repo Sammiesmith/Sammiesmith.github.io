@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 Project 5B: Flow Matching from Scratch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .section {
+            background: white;
+            margin-bottom: 40px;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .section h3 {
+            color: #764ba2;
+            font-size: 1.5em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        .section h4 {
+            color: #555;
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            background: #f9f9f9;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+
+        .description p {
+            margin-bottom: 10px;
+        }
+
+        .description ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .description li {
+            margin-bottom: 5px;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .image-container {
+            text-align: center;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .image-container img:hover {
+            transform: scale(1.02);
+        }
+
+        .image-caption {
+            margin-top: 10px;
+            font-style: italic;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .single-image {
+            max-width: 800px;
+            margin: 25px auto;
+            text-align: center;
+        }
+
+        .single-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .math {
+            font-style: italic;
+            background: #f9f9f9;
+            padding: 10px 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: #666;
+            border-top: 1px solid #ddd;
+            margin-top: 60px;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CS180 Project 5B: Flow Matching from Scratch</h1>
+            <p>Training Diffusion Models on MNIST</p>
+        </div>
+    </header>
+    <div class="nav">
+    <a href="partA.html">← Go to Part A</a>
+</div>
+
+    <div class="container">
+        <!-- Part 1: Single-Step Denoising -->
+        <div class="section">
+            <h2>Part 1: Training a Single-Step Denoising UNet</h2>
+            
+            <div class="description">
+                <p>In this part, I built a simple one-step denoiser using a UNet architecture. The goal was to train a model that can denoise images corrupted with Gaussian noise.</p>
+                <p>The denoising objective is: <strong>L = E<sub>z,x</sub> ||D<sub>θ</sub>(z) - x||²</strong></p>
+                <p>Where <code>z = x + σε</code> with <code>ε ~ N(0, I)</code></p>
+            </div>
+
+            <h3>1.1 UNet Architecture</h3>
+            <div class="description">
+                <p>I implemented a UNet with the following components:</p>
+                <ul>
+                    <li><strong>Conv blocks:</strong> Convolutional layers that preserve spatial dimensions</li>
+                    <li><strong>DownConv blocks:</strong> Downsampling layers that reduce resolution by 2x</li>
+                    <li><strong>UpConv blocks:</strong> Upsampling layers that increase resolution by 2x</li>
+                    <li><strong>Skip connections:</strong> Connecting encoder and decoder layers</li>
+                    <li>Hidden dimension D = 128</li>
+                </ul>
+                <div class="single-image">
+                <img src="partB_outputs/unet_uncond_architecture.png" alt="unet unconditional architecture">
+                <p class="image-caption">Unconditional Unet Architecture</p>
+            </div>
+            </div>
+
+            <h3>1.2 Noising Process Visualization</h3>
+            <div class="description">
+                <p>Visualization of the noising process with σ = [0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0]</p>
+            </div>
+            <div class="single-image">
+                <img src="partB_outputs/part1_2_noising.png" alt="Noising Process">
+                <p class="image-caption">Figure 1.2: Images with increasing noise levels</p>
+            </div>
+
+            <h3>1.2.1 Training Results (σ = 0.5)</h3>
+            <div class="description">
+                <p><strong>Training Setup:</strong></p>
+                <ul>
+                    <li>Dataset: MNIST training set</li>
+                    <li>Batch size: 256</li>
+                    <li>Epochs: 5</li>
+                    <li>Optimizer: Adam (lr=1e-4)</li>
+                    <li>Noise level: σ = 0.5</li>
+                </ul>
+            </div>
+
+            <h4>Training Loss Curve</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part1_2_1_loss.png" alt="Training Loss">
+                <p class="image-caption">Figure 1.2.1a: Training loss over iterations for σ = 0.5</p>
+            </div>
+
+            <h4>Denoising Results After Epoch 1</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part1_2_1_epoch1.png" alt="Epoch 1 Results">
+                <p class="image-caption">Figure 1.2.1b: Denoising results after 1 epoch</p>
+            </div>
+
+            <h4>Denoising Results After Epoch 5</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part1_2_1_epoch5.png" alt="Epoch 5 Results">
+                <p class="image-caption">Figure 1.2.1c: Denoising results after 5 epochs of training</p>
+            </div>
+
+            <h3>1.2.2 Out-of-Distribution Testing</h3>
+            <div class="description">
+                <p>Testing the denoiser (trained on σ = 0.5) on different noise levels to evaluate generalization.</p>
+            </div>
+            <div class="single-image">
+                <img src="partB_outputs/part1_2_2_ood.png" alt="OOD Testing">
+                <p class="image-caption">Figure 1.2.2: Out-of-distribution results with varying σ values</p>
+            </div>
+
+            <h3>1.2.3 Denoising Pure Noise</h3>
+            <div class="description">
+                <p>I trained the denoiser to denoise pure Gaussian noise (ε ~ N(0, I)) into recognizable digits.</p>
+                <p><strong>Observations:</strong> When the denoiser is trained to map pure Gaussian noise to clean MNIST images, the input contains no information about which digit the model should produce. Under an MSE loss, the optimal solution is the output that minimizes the squared distance to all training images simultaneously. This is the pixelwise average (centroid) of the dataset. As a result, the model quickly collapses to generating the same blurry, prototype-like digit regardless of the noise input: initially just faint blobs, and after more training, a smooth blend of common MNIST shapes (resembling a fuzzy 0, 3, or 8). These outputs do not represent true samples but rather the dataset’s mean, reflecting the fact that without conditioning, denoising becomes a regression-to-the-average problem rather than a generative one. We see this in the training curve plot: training loss doesn’t improve over iterations, and it fluctuates about the pixel wise avg prediction. The denoised images don’t move closer to the original digits over training epochs, the only noticeable difference is that the predictions are slightly less pixelated in epoch 5 compared to epoch 1. 
+</p>
+            </div>
+
+            <h4>Training Loss Curve</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part1_2_3_loss.png" alt="Pure Noise Loss">
+                <p class="image-caption">Figure 1.2.3a: Training loss for denoising pure noise</p>
+            </div>
+
+            <h4>Results After Epoch 1</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part1_2_3_epoch1.png" alt="Pure Noise Epoch 1">
+                <p class="image-caption">Figure 1.2.3b: Pure noise denoising after 1 epoch</p>
+            </div>
+
+            <h4>Results After Epoch 5</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part1_2_3_epoch5.png" alt="Pure Noise Epoch 5">
+                <p class="image-caption">Figure 1.2.3c: Pure noise denoising after 5 epochs - note the blurry, averaged appearance</p>
+            </div>
+        </div>
+
+        <!-- Part 2: Flow Matching -->
+        <div class="section">
+            <h2>Part 2: Training a Flow Matching Model</h2>
+            
+            <div class="description">
+                <p>Flow matching enables iterative denoising by learning the velocity field from noise to clean data.</p>
+                <p>I defined: <code>x<sub>t</sub> = (1-t)x<sub>0</sub> + tx<sub>1</sub></code> where x<sub>0</sub> ~ N(0,I) and x<sub>1</sub> is clean data</p>
+                <p>The flow (velocity) is: <code>u(x<sub>t</sub>, t) = dx<sub>t</sub>/dt = x<sub>1</sub> - x<sub>0</sub></code></p>
+                <p>Training objective: <strong>L = E ||( x<sub>1</sub> - x<sub>0</sub>) - u<sub>θ</sub>(x<sub>t</sub>, t)||²</strong></p>
+            </div>
+
+            <h3>2.1 Time-Conditioned UNet</h3>
+            <div class="description">
+                <p>I extended the UNet to be conditioned on timestep t using FCBlocks (Fully-Connected Blocks):</p>
+                <ul>
+                    <li>Two FCBlocks to embed scalar t</li>
+                    <li>Timestep embedding injected via modulation at unflatten and up1 layers</li>
+                    <li>Hidden dimension D = 64</li>
+                </ul>
+                            <div class="single-image">
+                <img src="partB_outputs/unet_cond_architecture..png" alt="Time-conditioned Unet Architecture">
+                <p class="image-caption">Time Conditioned Unet Architecture</p>
+            </div>
+            </div>
+
+            <h3>2.2 Training the Time-Conditioned UNet</h3>
+            <div class="description">
+                <p><strong>Training Setup:</strong></p>
+                <ul>
+                    <li>Batch size: 64</li>
+                    <li>Epochs: 20</li>
+                    <li>Optimizer: Adam (lr=1e-2) with exponential decay scheduler</li>
+                    <li>Random t ~ U[0,1] for each sample</li>
+                </ul>
+            </div>
+
+            <h4>Training Loss Curve</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part2_2_loss.png" alt="Time-conditioned Loss">
+                <p class="image-caption">Figure 2.2: Training loss for time-conditioned UNet</p>
+            </div>
+
+            <h3>2.3 Sampling from Time-Conditioned UNet</h3>
+            <div class="description">
+                <p>I used iterative denoising using Euler's method with step size Δt. Starting from pure noise, I iteratively predicted and followed the flow to generate clean digits. Notice that even by Epoch 10, it's still difficult to recognise the images as digits. </p>
+                <p>The time-conditioned UNet struggles to produce recognizable digits because it lacks explicit control over which digit to generate. In flow matching, the model learns a single velocity field that must handle all possible paths from noise to any digit in the dataset. Without class conditioning, when sampling from a random initial noise point, the model doesn't know which of the ten digit classes to flow toward, so the predicted velocity field often points toward an average or interpolated direction between multiple digit modes. This results in the flow trajectory landing in ambiguous regions of the data manifold, producing blurry or inconsistent digits.</p>
+            </div>
+
+            <h4>Results After Epoch 1</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part2_3_epoch1.png" alt="Time-cond Epoch 1">
+                <p class="image-caption">Figure 2.3a: Sampling results after 1 epoch</p>
+            </div>
+
+            <h4>Results After Epoch 5</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part2_3_epoch5.png" alt="Time-cond Epoch 5">
+                <p class="image-caption">Figure 2.3b: Sampling results after 5 epochs</p>
+            </div>
+
+            <h4>Results After Epoch 10</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part2_3_epoch10.png" alt="Time-cond Epoch 10">
+                <p class="image-caption">Figure 2.3c: Sampling results after 10 epochs</p>
+            </div>
+
+            <h3>2.4 Class-Conditioned UNet</h3>
+            <div class="description">
+                <p>I added class conditioning to control which digit (0-9) to generate:</p>
+                <ul>
+                    <li>Class c represented as one-hot vector</li>
+                    <li>Two additional FCBlocks for class embedding</li>
+                    <li>10% unconditional training (p<sub>uncond</sub> = 0.1) for classifier-free guidance</li>
+                    <li>Modulation: <code>unflatten = c1 * unflatten + t1</code> and <code>up1 = c2 * up1 + t2</code></li>
+                </ul>
+            </div>
+
+            <h3>2.5 Training the Class-Conditioned UNet</h3>
+            <div class="description">
+                <p><strong>Training Setup:</strong></p>
+                <ul>
+                    <li>Same as time-conditioned, plus class one-hot vector</li>
+                    <li>10% dropout of class conditioning during training</li>
+                    <li>Epochs: 10 (faster convergence with class conditioning)</li>
+                </ul>
+            </div>
+
+            <h4>Training Loss Curve</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part2_5_loss.png" alt="Class-conditioned Loss">
+                <p class="image-caption">Figure 2.5: Training loss for class-conditioned UNet</p>
+            </div>
+
+            <h3>2.6 Sampling with Classifier-Free Guidance</h3>
+            <div class="description">
+                <p>I used classifier-free guidance with γ = 5.0 to improve sample quality:</p>
+                <p><code>u<sub>cfg</sub> = γu<sub>θ</sub>(x<sub>t</sub>, t, c) + (1-γ)u<sub>θ</sub>(x<sub>t</sub>, t, ∅)</code></p>
+                <p>I generated 4 instances of each digit (0-9)</p>
+                <p>Class conditioning dramatically improves the quality because it allows the model to learn separate, class-specific velocity fields. By providing the target digit class as a one-hot vector, the flow matching model can predict velocities that specifically guide the trajectory from noise toward the correct digit class in the data distribution. This transforms the single ambiguous velocity field into ten distinct, well-defined flows, one for each digit. The classifier-free guidance further strengthens this by computing a weighted combination of the conditional and unconditional velocity predictions, which steers the flow more directly toward the target class and away from the average of all classes.</p>
+            </div>
+
+            <h4>Results After Epoch 1</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part2_6_epoch1.png" alt="Class-cond Epoch 1">
+                <p class="image-caption">Figure 2.6a: Class-conditioned sampling after 1 epoch (4 instances per digit)</p>
+            </div>
+
+            <h4>Results After Epoch 5</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part2_6_epoch5.png" alt="Class-cond Epoch 5">
+                <p class="image-caption">Figure 2.6b: Class-conditioned sampling after 5 epochs</p>
+            </div>
+
+            <h4>Results After Epoch 10</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part2_6_epoch10.png" alt="Class-cond Epoch 10">
+                <p class="image-caption">Figure 2.6c: Class-conditioned sampling after 10 epochs - high quality digits!</p>
+            </div>
+
+            <h3>2.6 Bonus: Training Without Learning Rate Scheduler</h3>
+            <div class="description">
+                <p><strong>Approach:</strong> Just remove the learning rate schedule and keep the learning rate at 1e-2 </p>
+                <p><strong>Performance:</strong> Simply removing the learning rate schedule and keeping the learning rate at 1e-2 did not change the quality of the results that much. Performance is slightly worse, see how the digit '4' is fragmented in Epoch 5. Note: I decided to stop training after Epoch 5 for this since the training loss has already converged.</p>
+                <p><strong>My Guess Why: </strong>Removing the learning rate scheduler leads to slightly worse performance because the model trains with a constant high learning rate of 1e-2 throughout all epochs. Early in training, this high learning rate helps the model quickly learn the overall structure of the velocity field and make rapid progress. However, later in training when the model needs to refine the learned flow to accurately predict velocities for smooth trajectories, the high learning rate causes the weights to overstep and oscillate rather than converging to a precise solution. This prevents the flow field from becoming as smooth and accurate as it would be with a decaying learning rate.</p>
+            </div>
+
+            <h4>Results Without Scheduler After Epoch 1</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part2_6_no_scheduler_epoch1.png" alt="No Scheduler Results">
+                <p class="image-caption">Figure 2.6d: Results without learning rate scheduler, Epoch 1</p>
+            </div>
+
+                        <h4>Results Without Scheduler After Epoch 1</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part2_6_no_scheduler_epoch5.png" alt="No Scheduler Results">
+                <p class="image-caption">Figure 2.6e: Results without learning rate scheduler, Epoch 5</p>
+            </div>
+
+            <div class="description">
+                <p><strong>Approach:</strong> Remove learning rate scheduler and decrease learning rate to 1e-3</p>
+           <p><strong>Performance:</strong></p>
+           <p><strong>My Guess Why:</strong>Using a smaller fixed learning rate of 1e-3 recovers most of the performance because it enables stable convergence throughout training without requiring a scheduler. While the model learns the velocity field more slowly in early epochs compared to starting at 1e-2, it avoids the instability and oscillations in later training that prevent the flow from being accurately refined. The final performance is similar because by the end of training with a scheduler, the learning rate would have decayed to around 1e-3 anyway, meaning both approaches ultimately train with similar step sizes during the critical later epochs where the flow field is being fine-tuned for accurate sampling.</p>
+            </div>
+
+            <h4>Results Without Scheduler After Epoch 1</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part2_6_small_lr_epoch1.png" alt="Small learning rate Results">
+                <p class="image-caption">Figure 2.6f: Results without learning rate scheduler, with smaller learning rate lr=1e-3 Epoch 1</p>
+            </div>
+
+                        <h4>Results Without Scheduler After Epoch 1</h4>
+            <div class="single-image">
+                <img src="partB_outputs/part2_6_small_lr_epoch5.png" alt="Small learnining rate Results">
+                <p class="image-caption">Figure 2.6g: Results without learning rate scheduler, with smaller learning rate lr=1e-3, Epoch 5</p>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>CS180: Computer Vision - UC Berkeley - Fall 2025</p>
+            <p>Project 5B: Flow Matching from Scratch</p>
+            <p><strong>Sammie Smith</strong></p>
+        </div>
+    </footer>
+</body>
+</html>
