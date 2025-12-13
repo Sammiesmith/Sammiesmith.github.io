@@ -12,10 +12,10 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background-color: #f5f5f5;
+            color: #e4e4e7;
+            background-color: #0a0a0a;
         }
 
         .container {
@@ -25,52 +25,97 @@
         }
 
         header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
             color: white;
             padding: 60px 20px;
             text-align: center;
             margin-bottom: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            border: 1px solid #27272a;
         }
 
         h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
         }
 
         .subtitle {
             font-size: 1.2em;
-            opacity: 0.9;
+            opacity: 0.7;
+            font-weight: 400;
+        }
+
+        .nav {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .nav a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: #18181b;
+            color: #fafafa;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 1px solid #27272a;
+            font-weight: 500;
+            font-size: 0.95em;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: -0.01em;
+        }
+
+        .nav a:hover {
+            background: #27272a;
+            border-color: #3f3f46;
+            transform: translateX(-2px);
+        }
+
+        .nav a::before {
+            content: '←';
+            font-size: 1.1em;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav a:hover::before {
+            transform: translateX(-3px);
         }
 
         .section {
-            background: white;
+            background: #18181b;
             padding: 30px;
             margin-bottom: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            border: 1px solid #27272a;
         }
 
         h2 {
-            color: #667eea;
+            color: #fafafa;
             margin-bottom: 15px;
             padding-bottom: 10px;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 1px solid #27272a;
+            font-weight: 600;
+            letter-spacing: -0.02em;
         }
 
         h3 {
-            color: #764ba2;
+            color: #d4d4d8;
             margin-top: 25px;
             margin-bottom: 15px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
         }
 
         .description {
-            background-color: #f8f9fa;
+            background-color: #0f0f10;
             padding: 20px;
-            border-left: 4px solid #667eea;
+            border-left: 2px solid #3f3f46;
             margin-bottom: 20px;
-            border-radius: 5px;
+            border-radius: 8px;
         }
 
         .image-grid {
@@ -88,18 +133,21 @@
             max-width: 100%;
             height: auto;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            transition: transform 0.3s ease;
+            border: 1px solid #27272a;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .image-container img:hover {
-            transform: scale(1.05);
+            transform: translateY(-4px);
+            border-color: #3f3f46;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
         .caption {
             margin-top: 10px;
             font-style: italic;
-            color: #666;
+            color: #a1a1aa;
+            font-size: 0.95em;
         }
 
         .comparison-grid {
@@ -110,36 +158,42 @@
         }
 
         .code-block {
-            background-color: #2d2d2d;
-            color: #f8f8f2;
+            background-color: #0f0f10;
+            color: #e4e4e7;
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 8px;
             overflow-x: auto;
-            font-family: 'Courier New', monospace;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
             margin: 15px 0;
+            border: 1px solid #27272a;
         }
 
         .highlight {
-            background-color: #fff3cd;
+            background-color: #422006;
             padding: 2px 5px;
             border-radius: 3px;
+            color: #fef3c7;
         }
 
         .part-number {
             display: inline-block;
-            background: #667eea;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
+            background: #27272a;
+            color: #fafafa;
+            padding: 6px 16px;
+            border-radius: 6px;
             margin-bottom: 10px;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 0.9em;
+            letter-spacing: 0.02em;
+            border: 1px solid #3f3f46;
         }
 
         .toc {
-            background: #e7eef9;
+            background: #18181b;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 30px;
+            border: 1px solid #27272a;
         }
 
         .toc ul {
@@ -152,20 +206,23 @@
         }
 
         .toc a {
-            color: #667eea;
+            color: #d4d4d8;
             text-decoration: none;
             font-weight: 500;
+            transition: color 0.2s;
         }
 
         .toc a:hover {
+            color: #fafafa;
             text-decoration: underline;
         }
 
         footer {
             text-align: center;
             padding: 30px;
-            color: #666;
+            color: #71717a;
             margin-top: 40px;
+            border-top: 1px solid #27272a;
         }
 
         .slider-container {
@@ -174,12 +231,21 @@
 
         .noise-level {
             display: inline-block;
-            background: #764ba2;
-            color: white;
-            padding: 3px 10px;
-            border-radius: 15px;
+            background: #27272a;
+            color: #fafafa;
+            padding: 4px 12px;
+            border-radius: 6px;
             font-size: 0.9em;
             margin: 5px;
+            border: 1px solid #3f3f46;
+        }
+
+        p {
+            color: #d4d4d8;
+        }
+
+        ol, ul {
+            color: #d4d4d8;
         }
     </style>
 </head>
@@ -192,8 +258,8 @@
         </header>
 
         <div class="nav">
-    <a href="partB.html">← Go to Part B</a>
-    </div>
+            <a href="partB.html">Go to Part B</a>
+        </div>
 
         <div class="section toc">
             <h2>Table of Contents</h2>
@@ -431,7 +497,7 @@
                 </div>
                 
             </div>
-            <p>You can see how iteration 7 picks up on the curved lines in my drawing, and how iteration 10 has a ball by the horse’s head that becomes the star.</p>
+            <p>You can see how iteration 7 picks up on the curved lines in my drawing, and how iteration 10 has a ball by the horse's head that becomes the star.</p>
                         <div class="comparison-grid">
                 <div class="image-container">
                     <img src="partA_outputs/part_1_7_img5.jpg" alt="Drawing Input">
@@ -442,7 +508,7 @@
                     <p class="caption">Generated Output</p>
                 </div>
             </div>
-            <p>You can see how by iteration 3, there is some notion of ocean. In iteration 7 and 10, you can see radial straitions appear in the swans’ heads and the flower petal that eventually become the sun’s rays.</p>
+            <p>You can see how by iteration 3, there is some notion of ocean. In iteration 7 and 10, you can see radial straitions appear in the swans' heads and the flower petal that eventually become the sun's rays.</p>
 
 
             <h3>Inpainting</h3>
@@ -462,7 +528,7 @@
 
            <p>Here are the results on a couple of my own images!</p>
 
-           <p>My Dad and I have a running joke where he sarcastically compares himself to the dictator of North Korea when he ‘so cruelly’ reminds me to unload the dishwasher. He made this meme of himself that I will exploit.</p>
+           <p>My Dad and I have a running joke where he sarcastically compares himself to the dictator of North Korea when he 'so cruelly' reminds me to unload the dishwasher. He made this meme of himself that I will exploit.</p>
 
         <div class="image-container">
             <img src="partA_outputs/part_1_7_2_img3.jpg" alt="Original">
@@ -486,27 +552,27 @@
             <p class="caption">Inpainted Results</p>
         </div>
 
-        <p>It’s very bizarre. With out any prompt, the model fills in the sky with an image of a woman mediating.</p>
+        <p>It's very bizarre. With out any prompt, the model fills in the sky with an image of a woman mediating.</p>
             
 
 
             <h3>Text-Conditioned Image-to-Image</h3>
             <p>I had a lot more fun with this section. It was silly to find things to fill in. Across the board, results seem to devolve at scale=20, interestingly.
 "</p>
-<p>Here’s the Campanile filled in with "a sun palace in the clouds". Scale=1 and Scale=7 are my favorite results. </p>
+<p>Here's the Campanile filled in with "a sun palace in the clouds". Scale=1 and Scale=7 are my favorite results. </p>
             <div class="image-grid">
                 <div class="image-container">
                     <img src="partA_outputs/part_1_7_3_img1.jpg" alt="Text i2i 1">
                 </div>
                  </div>
             <div class="image-grid"></div>
-                <p>Here’s Kim Jong Dad’s face filled in with “a  sad drooling infant head”. The result for scale=5 is a personal favorite, with scale=3 coming in as a close second.</p>
+                <p>Here's Kim Jong Dad's face filled in with "a  sad drooling infant head". The result for scale=5 is a personal favorite, with scale=3 coming in as a close second.</p>
                 <div class="image-container">
                     <img src="partA_outputs/part_1_7_3_img2.jpg" alt="Text i2i 1">
                 </div>
                                  
             <div class="image-grid"></div>
-                <p>Here’s the surfer’s sunset view filled in with "a turtle swimming in liquid gold”. I like scale=5 the best.</p>
+                <p>Here's the surfer's sunset view filled in with "a turtle swimming in liquid gold". I like scale=5 the best.</p>
                 <div class="image-container">
                     <img src="partA_outputs/part_1_7_3_img3.jpg" alt="Text i2i 1">
                 </div>
@@ -532,14 +598,14 @@
             </div>
             
             <h3>Visual Anagram Results</h3>
-            <p>“A sad boy” vs “A happy boy”, scale = 3. You can see a smiling mustachioed man vs a screaming little boy
+            <p>"A sad boy" vs "A happy boy", scale = 3. You can see a smiling mustachioed man vs a screaming little boy
  </p>
            
                 <div class="image-container">
                     <img src="partA_outputs/part_1_8_img1.jpg" alt="">
         
                 </div>
-            <p>“A sad boy” vs “A sad girl”, scale=5. I got really lucky and got this good of a result on the first try!</p>
+            <p>"A sad boy" vs "A sad girl", scale=5. I got really lucky and got this good of a result on the first try!</p>
                 <div class="image-container">
                     <img src="partA_outputs/part_1_8_img2.jpg" alt="Flipped view" style="transform: rotate(180deg);">
                     

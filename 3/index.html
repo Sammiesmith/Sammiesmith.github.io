@@ -4,218 +4,401 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CS180 Project 3A — Sammie Smith</title>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
   body {
-    font-family: "Inter", Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.6;
-    margin: 40px auto;
-    max-width: 950px;
-    background-color: #fafafa;
-    color: #222;
+    margin: 0;
+    background-color: #0a0a0a;
+    color: #e4e4e7;
+    padding: 20px;
   }
-  h1, h2, h3 {
-    color: #003262;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
   }
+
+  header {
+    background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+    color: white;
+    padding: 3rem 2rem;
+    text-align: center;
+    border: 1px solid #27272a;
+    border-radius: 12px;
+    margin-bottom: 30px;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #fafafa;
+  }
+
+  header p {
+    font-size: 1.1rem;
+    opacity: 0.7;
+    font-weight: 400;
+  }
+
+  h2 {
+    color: #fafafa;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #27272a;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  h3 {
+    color: #d4d4d8;
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem 0;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  h4 {
+    color: #a1a1aa;
+    font-size: 1.2rem;
+    margin: 1.5rem 0 0.5rem 0;
+    font-weight: 600;
+  }
+
   img {
     max-width: 100%;
     border-radius: 8px;
     margin: 10px 0;
+    border: 1px solid #27272a;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  img:hover {
+    transform: translateY(-4px);
+    border-color: #3f3f46;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  }
+
   pre, code {
-    background-color: #f4f4f4;
+    background-color: #0f0f10;
     padding: 10px;
-    border-radius: 6px;
-    font-family: monospace;
+    border-radius: 8px;
+    font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
     display: block;
     overflow-x: auto;
+    color: #e4e4e7;
+    border: 1px solid #27272a;
   }
+
   a {
-    color: #0057B8;
+    color: #60a5fa;
     text-decoration: none;
     font-weight: 500;
+    transition: color 0.2s;
   }
+
   a:hover {
+    color: #93c5fd;
     text-decoration: underline;
   }
+
   .section {
-    margin-bottom: 40px;
+    background: #18181b;
+    margin-bottom: 2rem;
+    padding: 2.5rem;
+    border-radius: 12px;
+    border: 1px solid #27272a;
   }
-    /* Navigation */
+
   .nav {
     display: flex;
     justify-content: center;
     margin-bottom: 30px;
+    gap: 10px;
   }
+
   .nav a {
-    background-color: #003262;
-    color: white;
-    padding: 10px 20px;
-    margin: 0 5px;
-    border-radius: 5px;
+    background-color: #18181b;
+    color: #fafafa;
+    padding: 12px 24px;
+    border-radius: 8px;
     font-size: 16px;
+    border: 1px solid #27272a;
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: -0.01em;
   }
+
+  .nav a:hover {
+    background-color: #27272a;
+    border-color: #3f3f46;
+    text-decoration: none;
+  }
+
   .nav a.active {
-    background-color: #FDB515;
-    color: #003262;
+    background-color: #fbbf24;
+    color: #0a0a0a;
     font-weight: bold;
+    border-color: #fbbf24;
+  }
+
+  p {
+    color: #d4d4d8;
+    margin-bottom: 1rem;
+  }
+
+  ul {
+    color: #d4d4d8;
+    margin-left: 1.5rem;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+  }
+
+  strong {
+    color: #fafafa;
+  }
+
+  .photo-pairs div {
+    margin-bottom: 2rem;
+  }
+
+  .math-block {
+    background: #0f0f10;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 8px;
+    border: 1px solid #27272a;
+    overflow-x: auto;
+  }
+
+  .math-block p {
+    text-align: center;
+    margin: 0.5rem 0;
   }
 </style>
 </head>
 <body>
-  <div class="nav">
-  <a href="index.html" class="active">Project 3A</a>
-  <a href="project3B.html">Project 3B</a>
-</div>
+  <div class="container">
+    <header>
+      <h1>CS180 Project 3A: Image Mosaics</h1>
+      <p><strong>Author:</strong> Sammie Smith, Fall 2025</p>
+    </header>
 
-<h1>CS180 Project 3A</h1>
-<p><strong>Author:</strong> Sammie Smith, Fall 2025</p>
-
-<!-- ====================== PART A1 ====================== -->
-<div class="section">
-  <h2>Part A1: Shooting the Photos</h2>
-  <p>
-    For this part, I captured photo pairs that exhibit <strong>projective transformations</strong>
-    by rotating the camera around a fixed center of projection (without translating). Each pair has
-    40–70% overlap to ensure accurate homography estimation and alignment.
-  </p>
-  <p>
-    The scenes were chosen to have clear planar structures and good lighting conditions. All photos
-    were taken around the UC Berkeley campus using a standard phone camera with minimal distortion.
-  </p>
-
-  <div class="photo-pairs">
-    <div>
-      <h4>Mosaic A: Campanile at Sunset</h4>
-      <img src="./data/A1.jpg" alt="A1 photo">
-      <img src="./data/A2.jpg" alt="A2 photo">
+    <div class="nav">
+      <a href="index.html" class="active">Project 3A</a>
+      <a href="project3B.html">Project 3B</a>
     </div>
-    <div>
-      <h4>Mosaic B: Southside at Sunset</h4>
-      <img src="./data/B1.jpg" alt="B1 photo">
-      <img src="./data/B2.jpg" alt="B2 photo">
+
+    <!-- ====================== PART A1 ====================== -->
+    <div class="section">
+      <h2>Part A1: Shooting the Photos</h2>
+      <p>
+        For this part, I captured photo pairs that exhibit <strong>projective transformations</strong>
+        by rotating the camera around a fixed center of projection (without translating). Each pair has
+        40–70% overlap to ensure accurate homography estimation and alignment.
+      </p>
+      <p>
+        The scenes were chosen to have clear planar structures and good lighting conditions. All photos
+        were taken around the UC Berkeley campus using a standard phone camera with minimal distortion.
+      </p>
+
+      <div class="math-block">
+        <p><strong>Projective Transformation Constraint:</strong></p>
+        <p>Camera rotation only (no translation) ensures all points project through same center:</p>
+        <p>\[\mathbf{p}' = \mathbf{K}\mathbf{R}\mathbf{K}^{-1}\mathbf{p}\]</p>
+        <p>where \(\mathbf{K}\) is intrinsic matrix and \(\mathbf{R}\) is rotation</p>
+      </div>
+
+      <div class="photo-pairs">
+        <div>
+          <h4>Mosaic A: Campanile at Sunset</h4>
+          <img src="./data/A1.jpg" alt="A1 photo">
+          <img src="./data/A2.jpg" alt="A2 photo">
+        </div>
+        <div>
+          <h4>Mosaic B: Southside at Sunset</h4>
+          <img src="./data/B1.jpg" alt="B1 photo">
+          <img src="./data/B2.jpg" alt="B2 photo">
+        </div>
+        <div>
+          <h4>Mosaic C: View from Grimes</h4>
+          <img src="./data/C1.jpg" alt="C1 photo">
+          <img src="./data/C2.jpg" alt="C2 photo">
+        </div>
+      </div>
+
+      <p>
+        Each mosaic pair maintains a projective relationship, meaning every scene point is observed
+        through the same camera center but under a different viewing direction.
+      </p>
     </div>
-    <div>
-      <h4>Mosaic C: View from Grimes</h4>
-      <img src="./data/C1.jpg" alt="C1 photo">
-      <img src="./data/C2.jpg" alt="C2 photo">
-    </div>
-  </div>
 
-  <p>
-    Each mosaic pair maintains a projective relationship, meaning every scene point is observed
-    through the same camera center but under a different viewing direction.
-  </p>
-</div>
+    <div class="section">
+      <h2>Part A2: Recovering Homographies</h2>
+      <p><strong>Method:</strong>  
+      I used the system of equations we solved for in discussion to solve for the homography matrix.</p>
 
-<div class="section">
-  <h2>Part A2: Recovering Homographies</h2>
-  <p><strong>Method:</strong>  
-  I used the system of equations we solved for in discussion to solve for the homography matrix.</p>
+      <div class="math-block">
+        <p><strong>Homography Transformation:</strong></p>
+        <p>\[\begin{bmatrix} x' \\ y' \\ 1 \end{bmatrix} = \mathbf{H} \begin{bmatrix} x \\ y \\ 1 \end{bmatrix}\]</p>
+        <p>where \(\mathbf{H}\) is the 3×3 homography matrix:</p>
+        <p>\[\mathbf{H} = \begin{bmatrix} h_1 & h_2 & h_3 \\ h_4 & h_5 & h_6 \\ h_7 & h_8 & 1 \end{bmatrix}\]</p>
+      </div>
 
-  <p><strong>System of equations:</strong></p>
-  <pre><code># find A that solves Ah = b where h [h1 h2 ... h8].T and where b = [u, v]
+      <p><strong>System of equations:</strong></p>
+      <pre><code># find A that solves Ah = b where h [h1 h2 ... h8].T and where b = [u, v]
 # each correspondence gets two equations (like in discussion)
 # [ x y 1 0 0 0 -ux -uy] * h = u
 # [ 0 0 0 x y 1 -vx -vy] * h = v
-  </code></pre>
+      </code></pre>
 
-  <p>Then I solved the system <code>Ah = b</code> with Ordinary Least Squares to get the homography that resulted in the lowest reconstruction error.</p>
-</div>
+      <div class="math-block">
+        <p><strong>Linear System for Each Correspondence:</strong></p>
+        <p>\[\begin{bmatrix} x & y & 1 & 0 & 0 & 0 & -x'x & -x'y \\ 0 & 0 & 0 & x & y & 1 & -y'x & -y'y \end{bmatrix} \begin{bmatrix} h_1 \\ h_2 \\ h_3 \\ h_4 \\ h_5 \\ h_6 \\ h_7 \\ h_8 \end{bmatrix} = \begin{bmatrix} x' \\ y' \end{bmatrix}\]</p>
+      </div>
 
-<!-- ====================== MOSAIC A ====================== -->
-<div class="section">
-  <h3>Mosaic A: Campanile at Sunset</h3>
-  <p><strong>Images with correspondences labeled:</strong></p>
-  <img src="./data/A_correspondences_visual.jpeg" alt="A correspondences labeled">
-  <p><strong>Number of Correspondences:</strong> 21</p>
+      <div class="math-block">
+        <p><strong>Least Squares Solution:</strong></p>
+        <p>\[\mathbf{h} = (\mathbf{A}^T\mathbf{A})^{-1}\mathbf{A}^T\mathbf{b}\]</p>
+        <p>Minimizes \(\|\mathbf{A}\mathbf{h} - \mathbf{b}\|^2\) to find optimal homography parameters</p>
+      </div>
 
-  <h4>Resulting System of Equations</h4>
-  <ul>
-    <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=0" target="_blank">Matrix A (A_A_matrix)</a></li>
-    <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=630420030" target="_blank">Vector b (A_b_vector)</a></li>
-    <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=190314866" target="_blank">Resulting Homography h (A_h)</a></li>
-  </ul>
+      <p>Then I solved the system <code>Ah = b</code> with Ordinary Least Squares to get the homography that resulted in the lowest reconstruction error.</p>
+    </div>
 
-  <p><strong>Reconstruction Test on first correspondence:</strong><br>
-  Expected point: [1393 2224], Mapped point: [1393.07 2222.62] (accurate within a small error!)</p>
-</div>
+    <!-- ====================== MOSAIC A ====================== -->
+    <div class="section">
+      <h3>Mosaic A: Campanile at Sunset</h3>
+      <p><strong>Images with correspondences labeled:</strong></p>
+      <img src="./data/A_correspondences_visual.jpeg" alt="A correspondences labeled">
+      <p><strong>Number of Correspondences:</strong> 21</p>
 
-<!-- ====================== MOSAIC B ====================== -->
-<div class="section">
-  <h3>Mosaic B: Southside at Sunset</h3>
-  <p><strong>Images with correspondences labeled:</strong></p>
-  <img src="./data/B_correspondences_visual.jpeg" alt="B correspondences labeled">
-  <p><strong>Number of Correspondences:</strong> 28</p>
+      <h4>Resulting System of Equations</h4>
+      <ul>
+        <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=0" target="_blank">Matrix A (A_A_matrix)</a></li>
+        <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=630420030" target="_blank">Vector b (A_b_vector)</a></li>
+        <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=190314866" target="_blank">Resulting Homography h (A_h)</a></li>
+      </ul>
 
-  <h4>Resulting System of Equations</h4>
-  <ul>
-    <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=868888208" target="_blank">Matrix A (B_A_matrix)</a></li>
-    <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=2030061639" target="_blank">Vector b (B_b_vector)</a></li>
-    <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=1479816442" target="_blank">Resulting Homography h (B_h)</a></li>
-  </ul>
+      <div class="math-block">
+        <p><strong>Reconstruction Accuracy:</strong></p>
+        <p>Expected: \([1393, 2224]\), Mapped: \([1393.07, 2222.62]\)</p>
+        <p>Error: \(\|\mathbf{p}_{expected} - \mathbf{p}_{mapped}\| < 2\) pixels</p>
+      </div>
 
-  <p><strong>Reconstruction Test on first correspondence:</strong><br>
-  Expected point: [1922 1431], Mapped point: [1918.86 1431.98]</p>
-</div>
+      <p><strong>Reconstruction Test on first correspondence:</strong><br>
+      Expected point: [1393 2224], Mapped point: [1393.07 2222.62] (accurate within a small error!)</p>
+    </div>
 
-<!-- ====================== MOSAIC C ====================== -->
-<div class="section">
-  <h3>Mosaic C: View from Grimes</h3>
-  <p><strong>Images with correspondences labeled:</strong></p>
-  <img src="./data/C_correspondences_visual.jpeg" alt="C correspondences labeled">
-  <p><strong>Number of Correspondences:</strong> 24</p>
+    <!-- ====================== MOSAIC B ====================== -->
+    <div class="section">
+      <h3>Mosaic B: Southside at Sunset</h3>
+      <p><strong>Images with correspondences labeled:</strong></p>
+      <img src="./data/B_correspondences_visual.jpeg" alt="B correspondences labeled">
+      <p><strong>Number of Correspondences:</strong> 28</p>
 
-  <h4>Resulting System of Equations</h4>
-  <ul>
-    <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=1233241227" target="_blank">Matrix A (C_A_matrix)</a></li>
-    <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=907405172" target="_blank">Vector b (C_b_vector)</a></li>
-    <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=42427647" target="_blank">Resulting Homography h (C_h)</a></li>
-  </ul>
+      <h4>Resulting System of Equations</h4>
+      <ul>
+        <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=868888208" target="_blank">Matrix A (B_A_matrix)</a></li>
+        <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=2030061639" target="_blank">Vector b (B_b_vector)</a></li>
+        <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=1479816442" target="_blank">Resulting Homography h (B_h)</a></li>
+      </ul>
 
-  <p><strong>Reconstruction Test on first correspondence:</strong><br>
-  Expected point: [1449 260], Mapped point: [1455.59 259.37]</p>
-</div>
+      <p><strong>Reconstruction Test on first correspondence:</strong><br>
+      Expected point: [1922 1431], Mapped point: [1918.86 1431.98]</p>
+    </div>
 
-<!-- ====================== PART A3 ====================== -->
-<div class="section">
-  <h2>Part A3: Warp the Images</h2>
-  <p>To warp images, I first projected the four corners of the original image through the homography to find the bounding box. Then, I applied inverse mapping using the inverse homography (calculated in Part A2) to find each output pixel’s corresponding location in the original image.  
-  I implemented both Nearest Neighbor and Bilinear Interpolation. Nearest Neighbor is faster but lower quality, while Bilinear produces smoother results.</p>
+    <!-- ====================== MOSAIC C ====================== -->
+    <div class="section">
+      <h3>Mosaic C: View from Grimes</h3>
+      <p><strong>Images with correspondences labeled:</strong></p>
+      <img src="./data/C_correspondences_visual.jpeg" alt="C correspondences labeled">
+      <p><strong>Number of Correspondences:</strong> 24</p>
 
-  <h3>Mosaic A: Warping of the Campanile at Sunset</h3>
-  <img src="./data/A1.jpg" alt="A1 Original Image">
-  <img src="./data/A_warp_comparison.jpeg" alt="A Warp Comparison">
+      <h4>Resulting System of Equations</h4>
+      <ul>
+        <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=1233241227" target="_blank">Matrix A (C_A_matrix)</a></li>
+        <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=907405172" target="_blank">Vector b (C_b_vector)</a></li>
+        <li><a href="https://docs.google.com/spreadsheets/d/1OH73EVQGJ-F50C0mYkzBH_QPbGQzImOIOkiOC_RHJYE/edit#gid=42427647" target="_blank">Resulting Homography h (C_h)</a></li>
+      </ul>
 
-  <h3>Mosaic C: Warping of the View from Grimes</h3>
-  <img src="./data/C1.jpg" alt="C1 Original Image">
-  <img src="./data/C_warp_comparison.jpeg" alt="C Warp Comparison">
+      <p><strong>Reconstruction Test on first correspondence:</strong><br>
+      Expected point: [1449 260], Mapped point: [1455.59 259.37]</p>
+    </div>
 
-  <p><strong>Analysis of Interpolation:</strong>  
-  Nearest Neighbor interpolation is much faster (since it references one pixel), but Bilinear interpolation yields smoother, higher-quality images by averaging four neighboring pixels. On high-resolution JPGs, differences are subtle unless zoomed in; lower-resolution images show clearer quality gains.</p>
-</div>
+    <!-- ====================== PART A3 ====================== -->
+    <div class="section">
+      <h2>Part A3: Warp the Images</h2>
+      <p>To warp images, I first projected the four corners of the original image through the homography to find the bounding box. Then, I applied inverse mapping using the inverse homography (calculated in Part A2) to find each output pixel's corresponding location in the original image.  
+      I implemented both Nearest Neighbor and Bilinear Interpolation. Nearest Neighbor is faster but lower quality, while Bilinear produces smoother results.</p>
 
-<!-- ====================== PART A4 ====================== -->
-<div class="section">
-  <h2>Part A4: Blend the Images into a Mosaic</h2>
-  <p>Initially, I implemented image stitching by warping only the second image using a homography and then manually translating the first image onto the mosaic canvas. This aligned correspondences numerically but not visually. After testing post-warp translation corrections and canvas adjustments (which either shifted too far or caused blur), I realized both images needed to be placed in the same coordinate frame.  
-  My final version warps both images under a shared global transformation (the translation that normalizes mosaic coordinates). I then blend them using <strong>alpha blending</strong>, which weights each image more strongly near its center and fades toward its edges (based on distance to the closest border). This approach minimizes seams and creates a natural, continuous mosaic.</p>
+      <div class="math-block">
+        <p><strong>Inverse Warping:</strong></p>
+        <p>For each pixel \((x', y')\) in output image:</p>
+        <p>\[\begin{bmatrix} x \\ y \\ 1 \end{bmatrix} = \mathbf{H}^{-1} \begin{bmatrix} x' \\ y' \\ 1 \end{bmatrix}\]</p>
+        <p>Sample color from source image at \((x, y)\)</p>
+      </div>
 
-  <p>To remove the edge artifacts and transparency issues in my mosaics, I refined my blending pipeline to handle overlaps and non-overlapping regions differently. Initially, both warped images were globally alpha-blended, which caused visible dark seams and transparency along image borders. To fix this, I computed binary masks identifying valid pixel regions in each warped image, and separated overlap from unique regions. Non-overlapping parts were assigned full intensity, while overlapping regions were smoothly blended using per-pixel alpha masks that fade toward each image’s edges. This selective blending ensured seamless transitions where images overlap, while keeping the rest of the mosaic sharp and fully opaque. The final result removed the gray transparency problem and produced visually continuous panoramas with clean, natural edges.</p>
+      <div class="math-block">
+        <p><strong>Bilinear Interpolation:</strong></p>
+        <p>\[I(x, y) = (1-\alpha)(1-\beta)I_{00} + \alpha(1-\beta)I_{10} + (1-\alpha)\beta I_{01} + \alpha\beta I_{11}\]</p>
+        <p>where \(\alpha = x - \lfloor x \rfloor\) and \(\beta = y - \lfloor y \rfloor\)</p>
+      </div>
 
-  <p> Notice pre and post attempts to soften edge artifacts (correspondence alignment img with transparency and string edge artifacts vs final mosaic with softer edge artifacts and no transparency</p>
+      <h3>Mosaic A: Warping of the Campanile at Sunset</h3>
+      <img src="./data/A1.jpg" alt="A1 Original Image">
+      <img src="./data/A_warp_comparison.jpeg" alt="A Warp Comparison">
 
-  <h3>Mosaic A: Campanile at Sunset</h3>
-  <img src="./data/A_mosaic.jpeg" alt="A Final Mosaic">
-  <img src="./data/A_aligned_correspondences.jpeg" alt="A Aligned Correspondences">
+      <h3>Mosaic C: Warping of the View from Grimes</h3>
+      <img src="./data/C1.jpg" alt="C1 Original Image">
+      <img src="./data/C_warp_comparison.jpeg" alt="C Warp Comparison">
 
-  <h3>Mosaic B: Southside at Sunset</h3>
-  <img src="./data/B_mosaic.jpeg" alt="B Final Mosaic">
-  <img src="./data/B_aligned_correspondences.jpeg" alt="B Aligned Correspondences">
+      <p><strong>Analysis of Interpolation:</strong>  
+      Nearest Neighbor interpolation is much faster (since it references one pixel), but Bilinear interpolation yields smoother, higher-quality images by averaging four neighboring pixels. On high-resolution JPGs, differences are subtle unless zoomed in; lower-resolution images show clearer quality gains.</p>
+    </div>
 
-  <h3>Mosaic C: View from Grimes</h3>
-  <img src="./data/C_mosaic.jpeg" alt="C Final Mosaic">
-  <img src="./data/C_aligned_correspondences.jpeg" alt="C Aligned Correspondences">
-</div>
+    <!-- ====================== PART A4 ====================== -->
+    <div class="section">
+      <h2>Part A4: Blend the Images into a Mosaic</h2>
+      <p>Initially, I implemented image stitching by warping only the second image using a homography and then manually translating the first image onto the mosaic canvas. This aligned correspondences numerically but not visually. After testing post-warp translation corrections and canvas adjustments (which either shifted too far or caused blur), I realized both images needed to be placed in the same coordinate frame.  
+      My final version warps both images under a shared global transformation (the translation that normalizes mosaic coordinates). I then blend them using <strong>alpha blending</strong>, which weights each image more strongly near its center and fades toward its edges (based on distance to the closest border). This approach minimizes seams and creates a natural, continuous mosaic.</p>
 
+      <div class="math-block">
+        <p><strong>Alpha Blending:</strong></p>
+        <p>\[I_{final}(x, y) = \alpha(x, y) \cdot I_1(x, y) + (1 - \alpha(x, y)) \cdot I_2(x, y)\]</p>
+        <p>where \(\alpha(x, y)\) is computed based on distance to image edges</p>
+      </div>
+
+      <p>To remove the edge artifacts and transparency issues in my mosaics, I refined my blending pipeline to handle overlaps and non-overlapping regions differently. Initially, both warped images were globally alpha-blended, which caused visible dark seams and transparency along image borders. To fix this, I computed binary masks identifying valid pixel regions in each warped image, and separated overlap from unique regions. Non-overlapping parts were assigned full intensity, while overlapping regions were smoothly blended using per-pixel alpha masks that fade toward each image's edges. This selective blending ensured seamless transitions where images overlap, while keeping the rest of the mosaic sharp and fully opaque. The final result removed the gray transparency problem and produced visually continuous panoramas with clean, natural edges.</p>
+
+      <p>Notice pre and post attempts to soften edge artifacts (correspondence alignment img with transparency and string edge artifacts vs final mosaic with softer edge artifacts and no transparency</p>
+
+      <h3>Mosaic A: Campanile at Sunset</h3>
+      <img src="./data/A_mosaic.jpeg" alt="A Final Mosaic">
+      <img src="./data/A_aligned_correspondences.jpeg" alt="A Aligned Correspondences">
+
+      <h3>Mosaic B: Southside at Sunset</h3>
+      <img src="./data/B_mosaic.jpeg" alt="B Final Mosaic">
+      <img src="./data/B_aligned_correspondences.jpeg" alt="B Aligned Correspondences">
+
+      <h3>Mosaic C: View from Grimes</h3>
+      <img src="./data/C_mosaic.jpeg" alt="C Final Mosaic">
+      <img src="./data/C_aligned_correspondences.jpeg" alt="C Aligned Correspondences">
+    </div>
+
+  </div>
 </body>
 </html>

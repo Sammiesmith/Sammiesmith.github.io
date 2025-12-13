@@ -1,21 +1,634 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Portfolio</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sammie Smith — CS180 Portfolio</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #0a0a0a;
+      --surface: #18181b;
+      --surface-hover: #27272a;
+      --border: #27272a;
+      --border-bright: #3f3f46;
+      --text: #e4e4e7;
+      --text-muted: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #60a5fa;
+      --accent-bright: #93c5fd;
+      --gradient: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    a:hover {
+      color: var(--accent-bright);
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+      position: relative;
+      background: 
+        radial-gradient(ellipse 1200px 800px at 50% -20%, rgba(96, 165, 250, 0.08), transparent),
+        radial-gradient(ellipse 800px 600px at 20% 100%, rgba(147, 197, 253, 0.05), transparent);
+    }
+
+    .hero-content {
+      max-width: 900px;
+      text-align: center;
+      z-index: 1;
+    }
+
+    .greeting {
+      font-size: clamp(14px, 2vw, 16px);
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease forwards;
+    }
+
+    .hero h1 {
+      font-size: clamp(48px, 8vw, 96px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #fafafa 0%, #a1a1aa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease 0.2s forwards;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(18px, 3vw, 28px);
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-bottom: 16px;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease 0.4s forwards;
+    }
+
+    .hero-description {
+      font-size: clamp(14px, 2vw, 18px);
+      color: var(--text-dim);
+      max-width: 600px;
+      margin: 0 auto 40px;
+      line-height: 1.8;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease 0.6s forwards;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease 0.8s forwards;
+    }
+
+    .btn {
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-bright);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(96, 165, 250, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border-color: var(--border-bright);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      background: rgba(96, 165, 250, 0.1);
+      transform: translateY(-2px);
+    }
+
+    /* About Section */
+    .about {
+      padding: 100px 20px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .about-content {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 14px;
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 32px;
+      color: var(--text);
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      margin-top: 40px;
+    }
+
+    .about-text {
+      color: var(--text-muted);
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    .about-text p {
+      margin-bottom: 20px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .stat-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-bright);
+      transform: translateY(-4px);
+    }
+
+    .stat-number {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Projects Section */
+    .projects {
+      padding: 100px 20px;
+    }
+
+    .projects-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 32px;
+      margin-top: 60px;
+    }
+
+    .project-card {
+      background: var(--gradient);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .project-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--border-bright);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .project-image {
+      width: 100%;
+      height: 350px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .project-placeholder {
+      font-size: 48px;
+      opacity: 0.3;
+    }
+
+    .project-content {
+      padding: 24px;
+    }
+
+    .project-meta {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .project-tag {
+      font-size: 11px;
+      padding: 4px 10px;
+      background: rgba(96, 165, 250, 0.15);
+      color: var(--accent-bright);
+      border: 1px solid rgba(96, 165, 250, 0.3);
+      border-radius: 999px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .project-card h3 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .project-card p {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .project-details {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Footer */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 60px 20px 40px;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 32px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 32px;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent);
+    }
+
+    .footer-copyright {
+      color: var(--text-dim);
+      font-size: 14px;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .about-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .project-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-content {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
 </head>
 <body>
-    <h1>Welcome to Sammie's CS180 Portfolio!</h1>
-    <a href="./0/index.html">Project 0</a>
-    <a href="./1/index.html">Project 1</a>
-    <a href="./2/index.html">Project 2</a>
-    <a href="./3/index.html">Project 3</a>
-    <a href="./4/part1.html">Project 4</a>
-    <a href="./5/partA.html">Project 5</a>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="greeting">Computer Vision Portfolio</div>
+      <h1>Sammie Smith</h1>
+      <p class="hero-subtitle">Computer Science + Data Science @ UC Berkeley</p>
+      <p class="hero-description">
+        Senior double major graduating Spring 2026, exploring the intersection of computer vision, 
+        machine learning, and creative visual computing through CS180.
+      </p>
+      <div class="cta-buttons">
+        <a href="#projects" class="btn btn-primary">View Projects</a>
+        <a href="#about" class="btn btn-secondary">About Me</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="about">
+    <div class="about-content">
+      <div class="section-label">About</div>
+      <h2 class="section-title">Building at the intersection of vision and intelligence</h2>
+      
+      <div class="about-grid">
+        <div class="about-text">
+          <p>
+            I'm a senior at UC Berkeley pursuing a double major in Computer Science and Data Science, 
+            with a focus on computer vision and machine learning. Through CS180: Introduction to Computer Vision 
+            and Computational Photography, I've developed a deep appreciation for how we can computationally 
+            understand and manipulate visual information.
+          </p>
+          <p>
+            This portfolio showcases my journey through fundamental concepts in image processing, frequency domain 
+            analysis, multi-view geometry, neural rendering, and generative models. Each project represents both 
+            technical implementation and creative exploration of visual computing.
+          </p>
+        </div>
+
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-number">6</div>
+            <div class="stat-label">Projects</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">2026</div>
+            <div class="stat-label">Graduation</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">CS+DS</div>
+            <div class="stat-label">Double Major</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">180</div>
+            <div class="stat-label">Course Number</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects Section -->
+  <section id="projects" class="projects">
+    <div class="projects-container">
+      <div class="section-label">Portfolio</div>
+      <h2 class="section-title">CS180 Projects</h2>
+      <p style="color: var(--text-muted); max-width: 700px; margin-bottom: 20px;">
+        Taught by Professor Alexei Efros and Professor Angjoo Kanazawa, CS180 explores the fundamentals 
+        of computer vision through hands-on projects spanning image processing, computational photography, 
+        3D reconstruction, and modern neural approaches.
+      </p>
+
+      <div class="project-grid">
+        
+        <!-- Project 0 -->
+        <a href="./0/index.html" class="project-card">
+          <div class="project-image">
+            <video autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover;">
+            <source src="./0/assets/part3.mp4" type="video/mp4" />
+            </video>
+        </div>
+          <div class="project-content">
+            <div class="project-meta">
+              <span class="project-tag">Project 0</span>
+              <span class="project-tag">Intro</span>
+            </div>
+            <h3>Creative Perspectives</h3>
+            <p>
+              Exploring fundamental photography concepts through creative composition: 
+              perspective compression, dolly zoom effects, and unconventional framing techniques.
+            </p>
+            <div class="project-details">
+              <strong>Topics:</strong> Photography basics, perspective, composition
+            </div>
+          </div>
+        </a>
+
+        <!-- Project 1 -->
+        <a href="./1/index.html" class="project-card">
+          <div class="project-image">
+                <img src="./1/outputs_new/emir_bells.jpg" alt="Project 1 - Emir colorized image">
+            </div>
+          <div class="project-content">
+            <div class="project-meta">
+              <span class="project-tag">Project 1</span>
+              <span class="project-tag">Image Alignment</span>
+            </div>
+            <h3>Images of the Russian Empire</h3>
+            <p>
+              Colorizing Prokudin-Gorskii's glass plate images through automatic alignment 
+              using image pyramids, NCC scoring, and edge-based features for robust registration.
+            </p>
+            <div class="project-details">
+              <strong>Topics:</strong> Image pyramids, alignment, feature detection
+            </div>
+          </div>
+        </a>
+
+        <!-- Project 2 -->
+        <a href="./2/index.html" class="project-card">
+          <div class="project-image">
+            <img src="./2/data/part_2_4/final_blend_mona_caledonia.png" alt="Project 2 - Mona Lisa hybrid image">
+          </div>
+          <div class="project-content">
+            <div class="project-meta">
+              <span class="project-tag">Project 2</span>
+              <span class="project-tag">Frequencies</span>
+            </div>
+            <h3>Fun with Filters and Frequencies</h3>
+            <p>
+              Implementing convolutions, edge detection, image sharpening, hybrid images, 
+              and multi-resolution blending using Gaussian and Laplacian pyramids.
+            </p>
+            <div class="project-details">
+              <strong>Topics:</strong> Convolution, frequency analysis, image pyramids
+            </div>
+          </div>
+        </a>
+
+        <!-- Project 3 -->
+        <a href="./3/index.html" class="project-card">
+          <div class="project-image">
+            <img src="./3/data/A_correspondences_visual.jpeg" alt="Project 3 - autostitched panorama">
+          </div>
+          <div class="project-content">
+            <div class="project-meta">
+              <span class="project-tag">Project 3</span>
+              <span class="project-tag">Geometry</span>
+            </div>
+            <h3>Homographies & Mosaicing</h3>
+            <p>
+              Creating image mosaics through homography estimation, 
+              feature matching (Harris corners, RANSAC), and automated image stitching.
+            </p>
+            <div class="project-details">
+              <strong>Topics:</strong> Homographies, feature detection, RANSAC, warping
+            </div>
+          </div>
+        </a>
+
+        <!-- Project 4 -->
+        <a href="./4/part1.html" class="project-card">
+          <div class="project-image">
+            
+            <img src="./4/output_imgs/novel_view_video_try3.gif" alt="Project 4 - Nerf render of lego backhoe">
+
+          </div>
+          <div class="project-content">
+            <div class="project-meta">
+              <span class="project-tag">Project 4</span>
+              <span class="project-tag">3D Vision</span>
+            </div>
+            <h3>Neural Radiance Fields (NeRF)</h3>
+            <p>
+              Implementing NeRF from scratch: fitting neural fields to 2D images, camera calibration, 
+              ray sampling, volumetric rendering, and novel view synthesis for 3D reconstruction.
+            </p>
+            <div class="project-details">
+              <strong>Topics:</strong> Neural rendering, 3D reconstruction, volumetric methods
+            </div>
+          </div>
+        </a>
+
+        <!-- Project 5 -->
+        <a href="./5/partA.html" class="project-card">
+          <div class="project-image">
+            <img src="./5/partB_outputs/part2_6_small_lr_epoch5.png" alt="Project 5 - MNIST reconstruction via Flow Model">
+          </div>
+          <div class="project-content">
+            <div class="project-meta">
+              <span class="project-tag">Project 5</span>
+              <span class="project-tag">Generative AI</span>
+            </div>
+            <h3>Diffusion and Flow Models</h3>
+            <p>
+              Exploring diffusion models from using pretrained models (DeepFloyd IF) to training UNets from scratch: 
+              denoising, flow matching, classifier-free guidance, and conditional generation on MNIST.
+            </p>
+            <div class="project-details">
+              <strong>Topics:</strong> Diffusion models, denoising, generative modeling, flow matching
+            </div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-copyright">
+        © 2025 Sammie Smith · CS180 Portfolio
+      </div>
+      <div class="footer-links">
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="mailto:sammie@berkeley.edu">Contact</a>
+      </div>
+    </div>
+  </footer>
+
 </body>
 </html>

@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS180 Project 4: Neural Radiance Fields</title>
+    <title>CS180 Project 4: Neural Radiance Fields - Part 1</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         * {
             margin: 0;
@@ -12,29 +14,71 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background-color: #f5f5f5;
+            color: #e4e4e7;
+            background-color: #0a0a0a;
         }
         
         header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
             color: white;
             padding: 3rem 2rem;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            margin: 20px;
         }
         
         header h1 {
             font-size: 2.5rem;
             margin-bottom: 0.5rem;
             font-weight: 600;
+            letter-spacing: -0.02em;
         }
         
         header p {
             font-size: 1.1rem;
-            opacity: 0.95;
+            opacity: 0.7;
+            font-weight: 400;
+        }
+
+        .nav {
+            margin: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .nav a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: #18181b;
+            color: #fafafa;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 1px solid #27272a;
+            font-weight: 500;
+            font-size: 0.95em;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: -0.01em;
+        }
+
+        .nav a:hover {
+            background: #27272a;
+            border-color: #3f3f46;
+            transform: translateX(2px);
+        }
+
+        .nav a::after {
+            content: '→';
+            font-size: 1.1em;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav a:hover::after {
+            transform: translateX(3px);
         }
         
         .container {
@@ -44,30 +88,42 @@
         }
         
         section {
-            background: white;
+            background: #18181b;
             margin: 2rem 0;
             padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            border: 1px solid #27272a;
         }
         
         h2 {
-            color: #667eea;
+            color: #fafafa;
             font-size: 2rem;
             margin-bottom: 1.5rem;
             padding-bottom: 0.5rem;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 1px solid #27272a;
+            font-weight: 600;
+            letter-spacing: -0.02em;
         }
         
         h3 {
-            color: #764ba2;
+            color: #d4d4d8;
             font-size: 1.5rem;
             margin: 2rem 0 1rem 0;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        h4 {
+            color: #a1a1aa;
+            font-size: 1.2rem;
+            margin: 1.5rem 0 0.5rem 0;
+            font-weight: 600;
         }
         
         p {
             margin-bottom: 1rem;
             text-align: justify;
+            color: #d4d4d8;
         }
         
         .image-container {
@@ -79,30 +135,39 @@
             max-width: 100%;
             height: auto;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 1px solid #27272a;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .image-container img:hover {
+            transform: translateY(-4px);
+            border-color: #3f3f46;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
         
         .image-caption {
             font-style: italic;
-            color: #666;
+            color: #a1a1aa;
             margin-top: 0.5rem;
             font-size: 0.9rem;
         }
         
         .code-block {
-            background: #f8f9fa;
-            border-left: 4px solid #667eea;
+            background: #0f0f10;
+            border-left: 2px solid #3f3f46;
             padding: 1rem;
             margin: 1rem 0;
-            font-family: 'Courier New', monospace;
-            border-radius: 4px;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            border-radius: 8px;
+            color: #e4e4e7;
         }
         
         .hyperparameters {
-            background: #f0f4ff;
-            padding: 1rem;
+            background: #0f0f10;
+            padding: 1.5rem;
             border-radius: 8px;
             margin: 1rem 0;
+            border: 1px solid #27272a;
         }
         
         .hyperparameters ul {
@@ -112,10 +177,11 @@
         
         .hyperparameters li {
             padding: 0.3rem 0;
+            color: #d4d4d8;
         }
         
         .hyperparameters strong {
-            color: #667eea;
+            color: #fafafa;
         }
         
         .grid-2col {
@@ -148,35 +214,68 @@
         }
         
         .observation-box {
-            background: #fff9e6;
-            border-left: 4px solid #ffc107;
+            background: #1a1410;
+            border-left: 2px solid #a16207;
             padding: 1rem;
             margin: 1rem 0;
-            border-radius: 4px;
+            border-radius: 8px;
         }
         
         .observation-box h4 {
-            color: #f57c00;
+            color: #fbbf24;
             margin-bottom: 0.5rem;
         }
         
         .observation-box ol {
             margin-left: 1.5rem;
+            color: #d4d4d8;
         }
         
         .observation-box li {
             margin-bottom: 0.5rem;
         }
+
+        .math-block {
+            background: #0f0f10;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            border: 1px solid #27272a;
+            overflow-x: auto;
+        }
+
+        .math-block p {
+            text-align: center;
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #fafafa;
+        }
+
+        code {
+            background: #27272a;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #e4e4e7;
+        }
+
+        ol {
+            color: #d4d4d8;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>CS180 Project 4: 3D Reconstruction from 2D Images using NeRF</h1>
-        <p><strong>Author:</strong> Sammie Smith | <strong>Semester:</strong> Fall 2025</p>
-        <div class="nav">
-            <a href="part2.html">Go to Part 2 →</a>
-        </div>
+        <h1>CS180 Project 4: Neural Radiance Fields</h1>
+                <p><strong>Author:</strong> Sammie Smith | <strong>Semester:</strong> Fall 2025</p>
     </header>
+
+    <div class="nav">
+        <a href="part2.html">Go to Part 2</a>
+    </div>
 
     <div class="container">
         
@@ -196,6 +295,18 @@
                 de-normalizing back to image coordinates) and 2) the corresponding colors. Below is a visualization 
                 of 100 random pixel samples from the fox image.
             </p>
+
+            <div class="math-block">
+                <p><strong>Pixel Coordinate Normalization:</strong></p>
+                <p>\[(x, y) \in [0, W] \times [0, H] \rightarrow (x', y') \in [0, 1] \times [0, 1]\]</p>
+                <p>where \(x' = \frac{x}{W}\) and \(y' = \frac{y}{H}\)</p>
+            </div>
+
+            <div class="math-block">
+                <p><strong>Color Normalization:</strong></p>
+                <p>\[RGB \in [0, 255]^3 \rightarrow RGB' \in [0, 1]^3\]</p>
+                <p>\(RGB' = \frac{RGB}{255}\)</p>
+            </div>
             
             <div class="image-container">
                 <img src="./output_imgs/sampled_pixels_fox.jpeg" alt="Sampled pixels from fox image">
@@ -207,6 +318,18 @@
         <section>
             <h3>Model Architecture</h3>
             <p>I used the same architecture as provided in the project specification.</p>
+
+            <div class="math-block">
+                <p><strong>Positional Encoding:</strong></p>
+                <p>\[\gamma(p) = [p, \sin(2^0\pi p), \cos(2^0\pi p), ..., \sin(2^{L-1}\pi p), \cos(2^{L-1}\pi p)]\]</p>
+                <p>where \(p\) is the input coordinate and \(L\) is the encoding frequency</p>
+            </div>
+
+            <div class="math-block">
+                <p><strong>Network Function:</strong></p>
+                <p>\[f_\theta: \mathbb{R}^2 \rightarrow \mathbb{R}^3\]</p>
+                <p>\(f_\theta(\gamma(x, y)) = RGB\)</p>
+            </div>
             
             <div class="image-container">
                 <img src="./output_imgs/model_architecture.jpg" alt="Model architecture diagram">
@@ -220,6 +343,11 @@
                     <li><strong>batch_size:</strong> 10000</li>
                     <li><strong>learning_rate:</strong> 1e-2</li>
                 </ul>
+            </div>
+
+            <div class="math-block">
+                <p><strong>Loss Function (MSE):</strong></p>
+                <p>\[\mathcal{L} = \frac{1}{N}\sum_{i=1}^{N} \|f_\theta(\gamma(x_i, y_i)) - RGB_i\|^2\]</p>
             </div>
         </section>
 

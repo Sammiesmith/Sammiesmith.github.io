@@ -3,186 +3,457 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Part 2: Fit a Neural Radiance Field</title>
+<title>CS180 Project 4: Neural Radiance Fields - Part 2</title>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
     body {
-        font-family: Arial, sans-serif;
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 40px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
         line-height: 1.6;
-        background: #fafafa;
+        color: #e4e4e7;
+        background-color: #0a0a0a;
+        padding: 20px;
     }
+
     header {
+        background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+        color: white;
+        padding: 3rem 2rem;
         text-align: center;
-        margin-bottom: 30px;
+        border: 1px solid #27272a;
+        border-radius: 12px;
+        max-width: 1200px;
+        margin: 0 auto 20px auto;
     }
+
+    header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+    }
+
     .nav {
-        text-align: center;
-        margin-bottom: 40px;
+        max-width: 1200px;
+        margin: 0 auto 40px auto;
+        display: flex;
+        justify-content: flex-start;
     }
+
     .nav a {
-        display: inline-block;
-        padding: 10px 18px;
-        background: #222;
-        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: #18181b;
+        color: #fafafa;
         text-decoration: none;
-        border-radius: 5px;
-        font-size: 16px;
+        border-radius: 8px;
+        border: 1px solid #27272a;
+        font-weight: 500;
+        font-size: 0.95em;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        letter-spacing: -0.01em;
     }
+
+    .nav a:hover {
+        background: #27272a;
+        border-color: #3f3f46;
+        transform: translateX(-2px);
+    }
+
+    .nav a::before {
+        content: '←';
+        font-size: 1.1em;
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav a:hover::before {
+        transform: translateX(-3px);
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    section {
+        background: #18181b;
+        margin: 2rem 0;
+        padding: 2.5rem;
+        border-radius: 12px;
+        border: 1px solid #27272a;
+    }
+
+    h2 {
+        color: #fafafa;
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #27272a;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+    }
+
+    h3 {
+        color: #d4d4d8;
+        font-size: 1.5rem;
+        margin: 2rem 0 1rem 0;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+    }
+
+    h4 {
+        color: #a1a1aa;
+        font-size: 1.2rem;
+        margin: 1.5rem 0 0.5rem 0;
+        font-weight: 600;
+    }
+
+    p {
+        margin-bottom: 1rem;
+        color: #d4d4d8;
+    }
+
     img {
         max-width: 100%;
         margin: 20px 0;
-        border: 1px solid #ddd;
+        border: 1px solid #27272a;
+        border-radius: 8px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    h2, h3 {
-        margin-top: 40px;
+
+    img:hover {
+        transform: translateY(-4px);
+        border-color: #3f3f46;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .math-block {
+        background: #0f0f10;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        border-radius: 8px;
+        border: 1px solid #27272a;
+        overflow-x: auto;
+    }
+
+    .math-block p {
+        text-align: center;
+        margin: 0.5rem 0;
+    }
+
+    .hyperparameters {
+        background: #0f0f10;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        border: 1px solid #27272a;
+    }
+
+    .hyperparameters pre {
+        color: #d4d4d8;
+        font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+        line-height: 1.8;
+    }
+
+    code {
+        background: #27272a;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+        font-size: 0.9em;
+        color: #e4e4e7;
+    }
+
+    strong {
+        color: #fafafa;
+    }
+
+    .image-caption {
+        text-align: center;
+        font-style: italic;
+        color: #a1a1aa;
+        margin-top: -10px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+    }
+
+    .observation-box {
+        background: #1a1410;
+        border-left: 2px solid #a16207;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        border-radius: 8px;
+    }
+
+    .observation-box p {
+        color: #d4d4d8;
     }
 </style>
 </head>
 <body>
 
 <header>
-    <h1>Part 2: Fit a Neural Radiance field from Multiple Images</h1>
+    <h1>Part 2: Fitting a Neural Radiance Field from Multiple Images</h1>
+            <p><strong>Author:</strong> Sammie Smith | <strong>Semester:</strong> Fall 2025</p>
+
 </header>
 
 <div class="nav">
-    <a href="part1.html">← Go to Part 1</a>
+    <a href="part1.html">Go to Part 1</a>
 </div>
 
-<h2>Part 2.1 Create Rays from Cameras</h2>
+<div class="container">
 
-<h3>Camera to World Coordinate Conversion:</h3>
-<p>This step converts points expressed in the camera coordinate frame into the world coordinate frame using the camera-to-world extrinsic matrix. The code first ensures that the input points and transformation matrices are in torch format and correctly handles both single points and batches. Points are converted to homogeneous coordinates, multiplied by the transpose of the c2w matrix to account for PyTorch’s row-vector convention, and then converted back to non-homogeneous form. The result is the corresponding location of each input point in the global world coordinate system.</p>
+<section>
+<h2>Part 2.1: Create Rays from Cameras</h2>
 
-<h3>Pixel to Camera Coordinate Conversion:</h3>
+<h3>Camera to World Coordinate Conversion</h3>
+<p>This step converts points expressed in the camera coordinate frame into the world coordinate frame using the camera-to-world extrinsic matrix. The code first ensures that the input points and transformation matrices are in torch format and correctly handles both single points and batches. Points are converted to homogeneous coordinates, multiplied by the transpose of the c2w matrix to account for PyTorch's row-vector convention, and then converted back to non-homogeneous form. The result is the corresponding location of each input point in the global world coordinate system.</p>
+
+<div class="math-block">
+    <p><strong>Homogeneous Transformation:</strong></p>
+    <p>\[\mathbf{p}_{world} = \mathbf{T}_{c2w} \cdot \mathbf{p}_{camera}\]</p>
+    <p>where \(\mathbf{T}_{c2w}\) is the 4×4 camera-to-world transformation matrix</p>
+</div>
+
+<h3>Pixel to Camera Coordinate Conversion</h3>
 <p>This stage converts 2D pixel coordinates into 3D camera coordinates by reversing the pinhole projection operation. Given the intrinsic matrix and an assumed depth value, each pixel location is lifted into a 3D point in the camera frame. The function forms homogeneous pixel coordinates, multiplies them by the inverse intrinsic matrix, and scales by depth, producing a direction-aligned point in the camera coordinate system.</p>
 
-<h3>Pixel to Ray Creation:</h3>
-<p>To build a ray, I use the camera-to-world matrix to determine the camera’s position (the ray origin) and transform a 3D point along the viewing direction into world coordinates. The ray direction is computed by subtracting the origin from the transformed point and normalizing the result. This yields a ray described by an origin and a direction vector for each image pixel, forming the basis for sampling and rendering in NeRF.</p>
+<div class="math-block">
+    <p><strong>Pinhole Camera Model:</strong></p>
+    <p>\[\begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = \mathbf{K} \begin{bmatrix} X_c/Z_c \\ Y_c/Z_c \\ 1 \end{bmatrix}\]</p>
+    <p>where \(\mathbf{K}\) is the intrinsic matrix:</p>
+    <p>\[\mathbf{K} = \begin{bmatrix} f_x & 0 & c_x \\ 0 & f_y & c_y \\ 0 & 0 & 1 \end{bmatrix}\]</p>
+</div>
 
-<h2>Part 2.2 Sampling</h2>
+<div class="math-block">
+    <p><strong>Inverse Projection:</strong></p>
+    <p>\[\mathbf{p}_{camera} = d \cdot \mathbf{K}^{-1} \begin{bmatrix} u \\ v \\ 1 \end{bmatrix}\]</p>
+    <p>where \(d\) is the depth value</p>
+</div>
 
-<h3>Sampling Rays from Images:</h3>
+<h3>Pixel to Ray Creation</h3>
+<p>To build a ray, I use the camera-to-world matrix to determine the camera's position (the ray origin) and transform a 3D point along the viewing direction into world coordinates. The ray direction is computed by subtracting the origin from the transformed point and normalizing the result. This yields a ray described by an origin and a direction vector for each image pixel, forming the basis for sampling and rendering in NeRF.</p>
+
+<div class="math-block">
+    <p><strong>Ray Equation:</strong></p>
+    <p>\[\mathbf{r}(t) = \mathbf{o} + t\mathbf{d}\]</p>
+    <p>where \(\mathbf{o}\) is ray origin, \(\mathbf{d}\) is normalized ray direction, and \(t \geq 0\)</p>
+</div>
+</section>
+
+<section>
+<h2>Part 2.2: Sampling</h2>
+
+<h3>Sampling Rays from Images</h3>
 <p>Once ray origins, ray directions, and pixel colors are precomputed for all images, the sampling function selects a random subset of rays to train the model. This reduces the computational load by working with a manageable number of rays per iteration while ensuring the sampled rays are drawn uniformly from the entire dataset, allowing the model to learn from all regions of the scene.</p>
 
-<h3>Sampling Points along Rays:</h3>
+<h3>Sampling Points along Rays</h3>
 <p>To prepare inputs for volume rendering, I sample multiple 3D points along each selected ray between near and far depth bounds. I use evenly spaced depth values and apply random perturbation to prevent aliasing and improve learning stability. Each sampled 3D point is computed using the ray equation, producing a structured grid of sample coordinates and corresponding depth values that serve as NeRF inputs.</p>
 
-<h2>Part 2.3 Putting the Dataloader all together</h2>
+<div class="math-block">
+    <p><strong>Stratified Sampling:</strong></p>
+    <p>\[t_i = t_{near} + \frac{i}{N}(t_{far} - t_{near}) + \epsilon_i\]</p>
+    <p>where \(i \in \{0, 1, ..., N-1\}\) and \(\epsilon_i \sim \mathcal{U}(0, \frac{t_{far} - t_{near}}{N})\)</p>
+</div>
+
+<div class="math-block">
+    <p><strong>3D Sample Points:</strong></p>
+    <p>\[\mathbf{x}_i = \mathbf{o} + t_i \mathbf{d}\]</p>
+</div>
+</section>
+
+<section>
+<h2>Part 2.3: Putting the Dataloader All Together</h2>
 <p><img src="./output_imgs/part_2_3_sample_rays.png" alt=""></p>
-<p>This visualization shows all cameras as well as 100 sampled rays in 3D.</p>
+<p class="image-caption">Visualization showing all cameras and 100 sampled rays in 3D space</p>
 
 <p><img src="./output_imgs/part_2_3_sample_rays_one_camera.png" alt=""></p>
-<p>This visualization shows one camera and its rays. You can see how all rays stay inside the camera frustrum.</p>
+<p class="image-caption">Single camera with its rays - note how all rays stay inside the camera frustum</p>
+</section>
 
-<h2>Part 2.4 Neural Radiance Field</h2>
+<section>
+<h2>Part 2.4: Neural Radiance Field</h2>
 <p>My neural network architecture is the same as the one in the project spec:</p>
+
+<div class="math-block">
+    <p><strong>Positional Encoding:</strong></p>
+    <p>\[\gamma(\mathbf{p}) = [\mathbf{p}, \sin(2^0\pi \mathbf{p}), \cos(2^0\pi \mathbf{p}), ..., \sin(2^{L-1}\pi \mathbf{p}), \cos(2^{L-1}\pi \mathbf{p})]\]</p>
+</div>
+
+<div class="math-block">
+    <p><strong>NeRF Function:</strong></p>
+    <p>\[F_\Theta: (\mathbf{x}, \mathbf{d}) \rightarrow (\mathbf{c}, \sigma)\]</p>
+    <p>Maps 3D position \(\mathbf{x}\) and viewing direction \(\mathbf{d}\) to RGB color \(\mathbf{c}\) and volume density \(\sigma\)</p>
+</div>
+
 <p>For positional encodings, I followed the equation from the problem spec. I kept the original input in the positional encoding, then used the alternating sin, cos of pi * input * 2**i where i is an index from 0 to L-1.</p>
 
-<p>Here are my hyperparameters:</p>
-<p>    num_iterations=10000, 
-    batch_size=10000, 
-    learning_rate=5e-4,
-    device=device,
-    log_every=100,
-    render_every=100,
-    near=2.0,
-    far=6.0,
-    n_samples=64
-</p>
+<div class="hyperparameters">
+<h4>Hyperparameters:</h4>
+<pre>num_iterations = 10000
+batch_size = 10000
+learning_rate = 5e-4
+log_every = 100
+render_every = 100
+near = 2.0
+far = 6.0
+n_samples = 64</pre>
+</div>
 
 <p><img src="./output_imgs/nerf_model_architecture.png" alt=""></p>
+<p class="image-caption">NeRF model architecture diagram</p>
+</section>
 
-<h2>Part 2.5 Volumetric Rendering</h2>
+<section>
+<h2>Part 2.5: Volumetric Rendering</h2>
 <p>This function implements the core volume rendering equation used in NeRF to convert sampled colors and densities along each camera ray into a final pixel color. Given RGB values and volumetric density values at multiple sample points along each ray, it first computes the spacing between sample locations and converts densities into alpha values that represent the probability of light terminating at each point. It then computes the ray transmittance, which represents how much light reaches each sample without being absorbed by earlier samples, using a cumulative product. The contribution of each sample is determined by multiplying its alpha value with the transmittance, producing per-sample weights. Finally, the function forms the rendered pixel color by taking a weighted sum of all RGB sample values along the ray, yielding a (N_rays × 3) output where each value represents the final color seen by the camera along a ray.</p>
 
+<div class="math-block">
+    <p><strong>Alpha Compositing:</strong></p>
+    <p>\[\alpha_i = 1 - \exp(-\sigma_i \delta_i)\]</p>
+    <p>where \(\sigma_i\) is volume density and \(\delta_i = t_{i+1} - t_i\) is the distance between samples</p>
+</div>
+
+<div class="math-block">
+    <p><strong>Transmittance:</strong></p>
+    <p>\[T_i = \prod_{j=1}^{i-1}(1 - \alpha_j)\]</p>
+</div>
+
+<div class="math-block">
+    <p><strong>Volume Rendering Equation:</strong></p>
+    <p>\[\mathbf{C}(\mathbf{r}) = \sum_{i=1}^{N} T_i \alpha_i \mathbf{c}_i\]</p>
+    <p>The final pixel color is a weighted sum of all sampled colors along the ray</p>
+</div>
+
 <p>Nerf Discussion worksheet was very helpful for this part, thanks TAs!!</p>
+</section>
 
+<section>
 <h2>Results - Attempt 1</h2>
-<p>In my first few attempts, I had an issue where the Nerf outputted very blurry reconstructions. I eventually realized that it was because in my positional encoding function,  I accidentally typed 2**L in my for loop, which meant that every element was extremely high frequency. My original attempts at NERF reconstruction were so blurry because the MLPs could not represent such high frequencies, so the model underfitted and produced a smoothed-over result. </p>
+<div class="observation-box">
+<p>In my first few attempts, I had an issue where the Nerf outputted very blurry reconstructions. I eventually realized that it was because in my positional encoding function, I accidentally typed 2**L in my for loop, which meant that every element was extremely high frequency. My original attempts at NERF reconstruction were so blurry because the MLPs could not represent such high frequencies, so the model underfitted and produced a smoothed-over result.</p>
 
-<p>
-So, it makes sense that none of my hyperparameter sweeps nor increasing the training time (not shown) did anything to improve the reconstruction quality. Initially, I had thought that increase the number of hidden units in my linear layers from 128 to 512 would help the model capture higher frequencies, but this, as I learned later was, not the real problem. I also tried sweeping the L values to no avail. 
-</p>
+<p>So, it makes sense that none of my hyperparameter sweeps nor increasing the training time (not shown) did anything to improve the reconstruction quality. Initially, I had thought that increase the number of hidden units in my linear layers from 128 to 512 would help the model capture higher frequencies, but this, as I learned later was, not the real problem. I also tried sweeping the L values to no avail.</p>
+</div>
 
 <h3>During Training:</h3>
 <p><img src="./output_imgs/lego_preds_grid.png" alt=""></p>
+<p class="image-caption">Training progression - note the blurry results due to incorrect positional encoding</p>
 
 <h3>Final Results:</h3>
 <p>PSNR curves on training and validation set.</p>
 <p><img src="./output_imgs/lego_train_val_psnr_curves_try2.png" alt=""></p>
+<p class="image-caption">Training and validation PSNR curves - Attempt 1</p>
 
 <p>3D rendering.</p>
 <p><img src="./output_imgs/novel_view_video_try2.gif" alt=""></p>
+<p class="image-caption">Novel view synthesis - Attempt 1</p>
+</section>
 
+<section>
 <h2>Results - Attempt 2</h2>
 <p>After fixing the positional encoding function as well as changing a few bugging x,y indexing to y,x indexing in my meshgrids, I saw a significant improvement in quality of results, loss, and PSNR.</p>
 
 <h3>During Training:</h3>
 <p><img src="./output_imgs/lego_preds_grid_try3.png" alt=""></p>
+<p class="image-caption">Training progression - much clearer results after fixes</p>
 
 <h3>Final Results:</h3>
 <p>PSNR curves on training and validation set.</p>
 <p><img src="./output_imgs/lego_train_val_psnr_curves_try3.png" alt=""></p>
+<p class="image-caption">Training and validation PSNR curves - Attempt 2 (improved)</p>
 
 <p>3D rendering.</p>
 <p><img src="./output_imgs/novel_view_video_try3.gif" alt=""></p>
+<p class="image-caption">Novel view synthesis - Attempt 2 (significantly improved)</p>
+</section>
 
-
-
+<section>
 <h2>Part 0: Camera Calibration</h2>
-<p>I began by running ArUco detection on each image using OpenCV’s built-in detector, which returns the pixel coordinates of any detected marker corners; if an image yields no detections, I return empty arrays so the pipeline can ignore it. For every marker ID, I define its corresponding 3D corner coordinates. In my first (and buggy) attempt at this, I calibrated on 6 tags but then scanned on 1 tag. I also assumed that the world origin was the top left corner of each tag out of the  6, which just doesn;t make sense. To improve it, I set the world origin with respect to the top-left tag, then calculated offsets of the other 5 tags. </p>
+<p>I began by running ArUco detection on each image using OpenCV's built-in detector, which returns the pixel coordinates of any detected marker corners; if an image yields no detections, I return empty arrays so the pipeline can ignore it. For every marker ID, I define its corresponding 3D corner coordinates. In my first (and buggy) attempt at this, I calibrated on 6 tags but then scanned on 1 tag. I also assumed that the world origin was the top left corner of each tag out of the 6, which just doesn't make sense. To improve it, I set the world origin with respect to the top-left tag, then calculated offsets of the other 5 tags.</p>
 
-<p>I loaded the calibration images from disk, amd resized them using cv2.resize for computational efficiency, and build the full list of object points and image points by pairing each detected 2D corner with its 3D world coordinate. Because I didn’t want to mess with the intrinsics matrix, I made sure to resize the calibration images by the same amount. Once all correspondences were collected, I called cv2.calibrateCamera, which runs nonlinear optimization to estimate the camera intrinsic matrix and distortion coefficients, along with per-image rotation and translation vectors.</p>
+<div class="math-block">
+    <p><strong>Camera Calibration Objective:</strong></p>
+    <p>Minimize reprojection error:</p>
+    <p>\[\min_{\mathbf{K}, \{\mathbf{R}_i, \mathbf{t}_i\}} \sum_{i=1}^{N} \sum_{j=1}^{M} \|\mathbf{x}_{ij} - \pi(\mathbf{K}, \mathbf{R}_i, \mathbf{t}_i, \mathbf{X}_j)\|^2\]</p>
+    <p>where \(\mathbf{x}_{ij}\) are observed 2D points and \(\mathbf{X}_j\) are known 3D points</p>
+</div>
+
+<p>I loaded the calibration images from disk, and resized them using cv2.resize for computational efficiency, and build the full list of object points and image points by pairing each detected 2D corner with its 3D world coordinate. Because I didn't want to mess with the intrinsics matrix, I made sure to resize the calibration images by the same amount. Once all correspondences were collected, I called cv2.calibrateCamera, which runs nonlinear optimization to estimate the camera intrinsic matrix and distortion coefficients, along with per-image rotation and translation vectors.</p>
 
 <p>For the object-scan images, I again detected markers and use cv2.solvePnP to recover the camera pose for each image that contains the reference tag. The result is a rotation vector and translation vector that define a world-to-camera transform, which I convert to a 3×4 extrinsic matrix, then inverted by transposing the rotation and adjusting the translation so that I got a camera-to-world matrix consistent with NeRF conventions.</p>
 
-<p>I stored each (image, c2w) pair and visualized all camera frustums in Viser by converting each rotation matrix to a quaternion and passing it, along with the translation and image preview, to the Viser server. </p>
+<p>I stored each (image, c2w) pair and visualized all camera frustums in Viser by converting each rotation matrix to a quaternion and passing it, along with the translation and image preview, to the Viser server.</p>
 
 <p><img src="./output_imgs/my_cameras.png" alt=""></p>
+<p class="image-caption">Camera visualization in 3D space</p>
+
 <p><img src="./output_imgs/my_cameras1.png" alt=""></p>
+<p class="image-caption">Alternative view of camera arrangement</p>
 
 <p>Before finalizing the dataset, I undistorted all images using cv2.undistort and the previously estimated intrinsics and distortion coefficients. I added functionality for optional cropping that computes an optimal new camera matrix and maps all pixel coordinates into this rectified domain. I undistorted all imgs from my data.</p>
-<p>To verify everything, I display a few undistorted images using Matplotlib, converting BGR to RGB manually. After that, I split the aligned (image, c2w) pairs into train/validation/test sets, extracted the focal length from the intrinsic matrix, and saveed all arrays of images, poses, and focal len into a single .npz file using numpy.savez so that the NeRF training pipeline can load everything in one step.</p>
 
+<p>To verify everything, I display a few undistorted images using Matplotlib, converting BGR to RGB manually. After that, I split the aligned (image, c2w) pairs into train/validation/test sets, extracted the focal length from the intrinsic matrix, and saved all arrays of images, poses, and focal len into a single .npz file using numpy.savez so that the NeRF training pipeline can load everything in one step.</p>
+</section>
 
-
-<h2>Part 2.6: NERF on My Object</h2>
+<section>
+<h2>Part 2.6: NeRF on My Object</h2>
 
 <h3>Model and Hyperparameters</h3>
-
 <p>I used the same model and hyperparameters as described for the lego data, except I set near=0.02 and far=0.5.</p>
 
-<h3>Reference Img</h3>
-
+<h3>Reference Image</h3>
 <p>Here is a training image so you can see what object I'm using.</p>
 <p><img src="./scan_photos_resized/IMG_9861.JPEG" alt=""></p>
+<p class="image-caption">Training image of custom object</p>
 
 <h3>During Training</h3>
-<p>Notice how training PSNR is not bad (gets to about 22). However, the reconstructions look really blurry. Even after retaking my photos, being super careful to take them at uniform distance with the same focal length as during calibration, I just wasn't able to do better than this. </p>
+<p>Notice how training PSNR is not bad (gets to about 22). However, the reconstructions look really blurry. Even after retaking my photos, being super careful to take them at uniform distance with the same focal length as during calibration, I just wasn't able to do better than this.</p>
 <p><img src="./output_imgs/my_training_preds_grid.png" alt=""></p>
+<p class="image-caption">Training progression on custom object</p>
 
 <h3>Final Results</h3>
-<p>PSNR curves on training and validation sets. It's not a surprise with how bad the resonstructed images look that validation PSNR is quite low. Also, with my small data set of images, I only had 6 validation images, meaning that the validation loss and PSNR might not be representative of my model's capabilities.</p>
+<p>PSNR curves on training and validation sets. It's not a surprise with how bad the reconstructed images look that validation PSNR is quite low. Also, with my small data set of images, I only had 6 validation images, meaning that the validation loss and PSNR might not be representative of my model's capabilities.</p>
 <p><img src="./output_imgs/my_data_train_val_psnr_curves.png" alt=""></p>
+<p class="image-caption">Training and validation PSNR curves for custom object</p>
 
 <h3>3D Rendering</h3>
 <p>Here is the 3D rendering of my object just cause I thought it was cool!</p>
-<p>You can sort-of see the statue in the center (it's a gray blur). Maybe it wasn't smart to choose a gray object and a gray background... Anyways, I spend 7 hours trying to improve this, so this is my stopping point.</p>
+<p>You can sort-of see the statue in the center (it's a gray blur). Maybe it wasn't smart to choose a gray object and a gray background... Anyways, I spent 7 hours trying to improve this, so this is my stopping point.</p>
 <p><img src="./output_imgs/novel_view_video_my_data.gif" alt=""></p>
+<p class="image-caption">Novel view synthesis of custom object</p>
 
 <h3>Camera Flyaround</h3>
 <p>Implementing the camera flyaround was really difficult, actually. I got really bad results when I rotated around the x, y, and z axes respectively. I think this is more due to poor predictions of novel views than any fly around code.</p>
 <p>Below is one of my attempts at this method.</p>
 <p><img src="./output_imgs/camera_flyaround.gif" alt=""></p>
+<p class="image-caption">Initial camera flyaround attempt</p>
 
 <p>To improve my camera flyaround, I interpolated between camera training poses to ensure that the flyaround matches the training distribution.</p>
 
-<p>First, I extracted positions and rotations from my c2w training matricies. Second, I created interpolation indicies using linspace then I interpolated mositions using np.interp. I interpolated roations usins Slerp. Third, I created new interpolated c2w matricies. Lastly, I rendered flyaround frames using the interpolated c2ws and stitched them together.</p>
+<p>First, I extracted positions and rotations from my c2w training matrices. Second, I created interpolation indices using linspace then I interpolated positions using np.interp. I interpolated rotations using Slerp. Third, I created new interpolated c2w matrices. Lastly, I rendered flyaround frames using the interpolated c2ws and stitched them together.</p>
+
+<div class="math-block">
+    <p><strong>Spherical Linear Interpolation (Slerp):</strong></p>
+    <p>\[\text{Slerp}(\mathbf{q}_0, \mathbf{q}_1, t) = \frac{\sin((1-t)\theta)}{\sin(\theta)}\mathbf{q}_0 + \frac{\sin(t\theta)}{\sin(\theta)}\mathbf{q}_1\]</p>
+    <p>where \(\theta = \cos^{-1}(\mathbf{q}_0 \cdot \mathbf{q}_1)\) and \(t \in [0, 1]\)</p>
+</div>
 
 <p>Improved flyaround:</p>
 <p><img src="./output_imgs/camera_flyaround_final.gif" alt=""></p>
+<p class="image-caption">Improved camera flyaround using pose interpolation</p>
+</section>
+
+</div>
 
 </body>
 </html>

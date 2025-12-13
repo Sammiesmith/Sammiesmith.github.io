@@ -4,66 +4,191 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CS180 Project 3B — Sammie Smith</title>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
   body {
-    font-family: "Inter", Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.6;
-    margin: 40px auto;
-    max-width: 950px;
-    background-color: #fafafa;
-    color: #222;
+    margin: 0;
+    background-color: #0a0a0a;
+    color: #e4e4e7;
+    padding: 20px;
   }
-  h1, h2, h3, h4 {
-    color: #003262;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
   }
+
+  header {
+    background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+    color: white;
+    padding: 3rem 2rem;
+    text-align: center;
+    border: 1px solid #27272a;
+    border-radius: 12px;
+    margin-bottom: 30px;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #fafafa;
+  }
+
+  h2 {
+    color: #fafafa;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #27272a;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  h3 {
+    color: #d4d4d8;
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem 0;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  h4 {
+    color: #a1a1aa;
+    font-size: 1.2rem;
+    margin: 1.5rem 0 0.5rem 0;
+    font-weight: 600;
+  }
+
   img {
     max-width: 100%;
     border-radius: 8px;
     margin: 10px 0;
     display: block;
+    border: 1px solid #27272a;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  img:hover {
+    transform: translateY(-4px);
+    border-color: #3f3f46;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  }
+
   pre, code {
-    background-color: #f4f4f4;
+    background-color: #0f0f10;
     padding: 10px;
-    border-radius: 6px;
-    font-family: monospace;
+    border-radius: 8px;
+    font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
     display: block;
     overflow-x: auto;
+    color: #e4e4e7;
+    border: 1px solid #27272a;
   }
+
   a {
-    color: #0057B8;
+    color: #60a5fa;
     text-decoration: none;
     font-weight: 500;
+    transition: color 0.2s;
   }
+
   a:hover {
+    color: #93c5fd;
     text-decoration: underline;
   }
+
   .section {
-    margin-bottom: 40px;
+    background: #18181b;
+    margin-bottom: 2rem;
+    padding: 2.5rem;
+    border-radius: 12px;
+    border: 1px solid #27272a;
   }
-  /* Navigation */
+
   .nav {
     display: flex;
     justify-content: center;
     margin-bottom: 30px;
+    gap: 10px;
   }
+
   .nav a {
-    background-color: #003262;
-    color: white;
-    padding: 10px 20px;
-    margin: 0 5px;
-    border-radius: 5px;
+    background-color: #18181b;
+    color: #fafafa;
+    padding: 12px 24px;
+    border-radius: 8px;
     font-size: 16px;
+    border: 1px solid #27272a;
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: -0.01em;
   }
+
+  .nav a:hover {
+    background-color: #27272a;
+    border-color: #3f3f46;
+    text-decoration: none;
+  }
+
   .nav a.active {
-    background-color: #FDB515;
-    color: #003262;
+    background-color: #fbbf24;
+    color: #0a0a0a;
     font-weight: bold;
+    border-color: #fbbf24;
+  }
+
+  p {
+    color: #d4d4d8;
+    margin-bottom: 1rem;
+  }
+
+  ul {
+    color: #d4d4d8;
+    margin-left: 1.5rem;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+  }
+
+  strong {
+    color: #fafafa;
+  }
+
+  .math-block {
+    background: #0f0f10;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 8px;
+    border: 1px solid #27272a;
+    overflow-x: auto;
+  }
+
+  .math-block p {
+    text-align: center;
+    margin: 0.5rem 0;
   }
 </style>
 </head>
 
 <body>
+<div class="container">
+
+<header>
+  <h1>CS180 Project 3B: Autostitching</h1>
+  <p><strong>Author:</strong> Sammie Smith, Fall 2025</p>
+</header>
 
 <!-- Navigation Bar -->
 <div class="nav">
@@ -71,11 +196,25 @@
   <a href="project3B.html" class="active">Project 3B</a>
 </div>
 
-<h1>CS180 Project 3B</h1>
-
 <!-- ========== Task B1 ========== -->
 <div class="section">
   <h2>Task B1: Harris Corner Detection</h2>
+  <p>Harris corner detection identifies interest points by analyzing the eigenvalues of the second moment matrix (structure tensor) at each pixel. Corners are locations where intensity changes significantly in multiple directions.</p>
+
+  <div class="math-block">
+    <p><strong>Harris Corner Response:</strong></p>
+    <p>\[R = \det(\mathbf{M}) - k \cdot \text{trace}(\mathbf{M})^2\]</p>
+    <p>where the structure tensor is:</p>
+    <p>\[\mathbf{M} = \begin{bmatrix} \sum I_x^2 & \sum I_x I_y \\ \sum I_x I_y & \sum I_y^2 \end{bmatrix}\]</p>
+  </div>
+
+  <div class="math-block">
+    <p><strong>Adaptive Non-Maximal Suppression (ANMS):</strong></p>
+    <p>For each corner \(i\), compute suppression radius:</p>
+    <p>\[r_i = \min_{j} \|\mathbf{x}_i - \mathbf{x}_j\| \text{ such that } f(\mathbf{x}_j) > c_{robust} \cdot f(\mathbf{x}_i)\]</p>
+    <p>Select corners with largest \(r_i\) for spatially distributed features</p>
+  </div>
+
   <p>Red dots are where corners were identified.</p>
   <h4>Corner Detection with Harris</h4>
   <img src="./data/C1_harris.jpeg" alt="Harris Corner Detection">
@@ -87,10 +226,18 @@
 <div class="section">
   <h2>Task B2: Feature Descriptor Extraction</h2>
   <p>At first, I implemented the feature descriptor extraction algorithm as we were instructed:</p>
-  <p>I first blurred the image with a gaussian filter to reduce aliasing before downsampling. Then, for every pixel in the image, I looked at a 40x40 pixel window around the pixel. I then took every 5th pixel in vertical and horizontal directions, resulting in a bunch of 8x8 descriptors. </p>
+  <p>I first blurred the image with a gaussian filter to reduce aliasing before downsampling. Then, for every pixel in the image, I looked at a 40x40 pixel window around the pixel. I then took every 5th pixel in vertical and horizontal directions, resulting in a bunch of 8x8 descriptors.</p>
 
-  <p>But, the descriptors looked closer to random noise than edge detectors. From what I know about CNNs, features that get learned look like edge detectors. And learned features are the best based off of some loss function. So I figured that it would probably be a good idea to get my descriptors to look more like edge detectors since I knew I was going to have to perform some kind of least squares loss on finding the best correspondences in RANSAC. </p>
-  <p>My improved extraction algorithm doesn’t assume that pixels are one whole unit each (integers). It assumes a pixel is a continuous space. Since I can’t index [0.5, 0.5] in arrays, I used scipy’s map_coordinates to perform bilinear interpolation to sample floating point (x, y) locations. This fixes the “pixel as one unit” rounding issue and results in less noise in my features!</p>
+  <div class="math-block">
+    <p><strong>Feature Descriptor:</strong></p>
+    <p>Extract 40×40 patch around interest point, downsample to 8×8:</p>
+    <p>\[\mathbf{f} = \text{Normalize}\left(\text{Subsample}(\text{Blur}(P_{40 \times 40}))\right)\]</p>
+    <p>Normalize: \(\mathbf{f}' = \frac{\mathbf{f} - \mu}{\sigma}\) for invariance to lighting</p>
+  </div>
+
+  <p>But, the descriptors looked closer to random noise than edge detectors. From what I know about CNNs, features that get learned look like edge detectors. And learned features are the best based off of some loss function. So I figured that it would probably be a good idea to get my descriptors to look more like edge detectors since I knew I was going to have to perform some kind of least squares loss on finding the best correspondences in RANSAC.</p>
+  <p>My improved extraction algorithm doesn't assume that pixels are one whole unit each (integers). It assumes a pixel is a continuous space. Since I can't index [0.5, 0.5] in arrays, I used scipy's map_coordinates to perform bilinear interpolation to sample floating point (x, y) locations. This fixes the "pixel as one unit" rounding issue and results in less noise in my features!</p>
+  
   <h4>Extraction (Top) and Improved Extraction (Bottom)</h4>
   <img src="./data/feature_descriptors_naive.jpeg" alt="Naive Descriptors">
   <img src="./data/feature_descriptors.jpeg" alt="Improved Descriptors">
@@ -100,7 +247,21 @@
 <div class="section">
   <h2>Task B3: Feature Matching</h2>
   <p>At first I implemented a feature matching algorithm that used double for loops. But this took a very long time to run, so I decided to somewhat vectorize it.</p>
-  <p>My implementation iterates through every descriptor in the first image and calculates the Euclidean distance from it to every descriptor in the second image (represented as a vector) using the L2 norm. Then, I choose the smallest and second smallest distances (1NN, 2NN). I assume that they must signal correspondences, as they are the best feature matches between any two points in both images. Finally, I apply Lowe’s ratio test to see how much better the best match is than the second best match. MOPs paper said that if they are close, then the feature is ambiguous and we should discard it, otherwise it’s useful.</p>
+  <p>My implementation iterates through every descriptor in the first image and calculates the Euclidean distance from it to every descriptor in the second image (represented as a vector) using the L2 norm. Then, I choose the smallest and second smallest distances (1NN, 2NN). I assume that they must signal correspondences, as they are the best feature matches between any two points in both images. Finally, I apply Lowe's ratio test to see how much better the best match is than the second best match. MOPs paper said that if they are close, then the feature is ambiguous and we should discard it, otherwise it's useful.</p>
+
+  <div class="math-block">
+    <p><strong>Euclidean Distance between Descriptors:</strong></p>
+    <p>\[d(\mathbf{f}_i, \mathbf{f}_j) = \|\mathbf{f}_i - \mathbf{f}_j\|_2 = \sqrt{\sum_{k=1}^{64}(f_{i,k} - f_{j,k})^2}\]</p>
+  </div>
+
+  <div class="math-block">
+    <p><strong>Lowe's Ratio Test:</strong></p>
+    <p>Accept match if:</p>
+    <p>\[\frac{d_{1NN}}{d_{2NN}} < \tau\]</p>
+    <p>where \(d_{1NN}\) is distance to nearest neighbor, \(d_{2NN}\) to second nearest</p>
+    <p>Typical threshold: \(\tau = 0.7\)</p>
+  </div>
+
   <p>See visualization of feature matches below:</p>
   <img src="./data/A_feature_matches.jpeg" alt="A Matches">
   <img src="./data/B_feature_matches.jpeg" alt="B Matches">
@@ -111,20 +272,42 @@
 <div class="section">
   <h2>Task B4: RANSAC for Robust Homography</h2>
   <p>As someone who loves the beauty of Least Squares, I have to say… this was a pretty fun algorithm to implement.</p>
-  <p>I implemented RANSAC as follows: For every iteration (a hyperparameter I set to 2000), I sampled 4 correspondences (to satisfy 8 degrees of freedom needed to calculate the homography) and computed the homography from my first image to my second. Then I projected all points in my first image using the homography. I calculated the error of projection using the L2 norm, then identified inliers as points whose errors were under some threshold (a hyperparameter I set to 3.0). I chose the final homography as the one that produced the most inliers across all iterations of the algorithm. </p>
-  <p>I ran into a few difficulties while coding this (a lot less fun). The provided Harris function gave me points as (y,x) but my RANSAC algorithm assumed (x,y). When I finally figured this out, I simply converted (y,x) to (x,y) while computing the homography and projections so I wouldn’t have to change my RANSAC algorithm. In part A, my mosaic stitched my second image onto my first image, but in RANSAC I computed my homography from my first image to my second image, so I rewrote my stitching code accordingly.</p>
+  <p>I implemented RANSAC as follows: For every iteration (a hyperparameter I set to 2000), I sampled 4 correspondences (to satisfy 8 degrees of freedom needed to calculate the homography) and computed the homography from my first image to my second. Then I projected all points in my first image using the homography. I calculated the error of projection using the L2 norm, then identified inliers as points whose errors were under some threshold (a hyperparameter I set to 3.0). I chose the final homography as the one that produced the most inliers across all iterations of the algorithm.</p>
+
+  <div class="math-block">
+    <p><strong>RANSAC Algorithm:</strong></p>
+    <p>For \(N\) iterations:</p>
+    <p>1. Randomly sample 4 point correspondences</p>
+    <p>2. Compute homography \(\mathbf{H}\) from these 4 points</p>
+    <p>3. Count inliers: points where \(\|\mathbf{p}'_i - \mathbf{H}\mathbf{p}_i\| < \epsilon\)</p>
+    <p>4. Keep \(\mathbf{H}\) with maximum inliers</p>
+  </div>
+
+  <div class="math-block">
+    <p><strong>Inlier Threshold:</strong></p>
+    <p>Point \(i\) is an inlier if:</p>
+    <p>\[\|\mathbf{p}'_i - \mathbf{H}\mathbf{p}_i\|_2 < \epsilon\]</p>
+    <p>where \(\epsilon = 3.0\) pixels (hyperparameter)</p>
+  </div>
+
+  <p>I ran into a few difficulties while coding this (a lot less fun). The provided Harris function gave me points as (y,x) but my RANSAC algorithm assumed (x,y). When I finally figured this out, I simply converted (y,x) to (x,y) while computing the homography and projections so I wouldn't have to change my RANSAC algorithm. In part A, my mosaic stitched my second image onto my first image, but in RANSAC I computed my homography from my first image to my second image, so I rewrote my stitching code accordingly.</p>
+  
   <h4>Improvements from hand stitching to autostitching</h4>
   <ul>
-    <li><strong>Diversity in Correspondences:</strong>Correspondences that the algorithm picked were ones that I couldn’t see clearly. For example, I chose corners of buildings but with feature matching, correspondences could be BOTH corners of buildings but also places where tree branches branch off. This results in a more even distribution of correspondences, and a cleaner stitch. 
-</li>
-    <li><strong>Number & Accuracy of Correspondences:</strong> Obviously, automatic feature matching from Harris correspondences results in way more correspondences than I had the patience to manually select. Not to mention, correspondences were more accurate when automatically chosen. This resulted in images being lined up better. 
-</li>
+    <li><strong>Diversity in Correspondences:</strong> Correspondences that the algorithm picked were ones that I couldn't see clearly. For example, I chose corners of buildings but with feature matching, correspondences could be BOTH corners of buildings but also places where tree branches branch off. This results in a more even distribution of correspondences, and a cleaner stitch.</li>
+    <li><strong>Number & Accuracy of Correspondences:</strong> Obviously, automatic feature matching from Harris correspondences results in way more correspondences than I had the patience to manually select. Not to mention, correspondences were more accurate when automatically chosen. This resulted in images being lined up better.</li>
   </ul>
+  
   <h4>Improvements from Part A to Part B (blending)</h4>
-  <p>In part A, I was running out of time, so I implemented a naive masking system to blend my images.I simply blended the edges at the overlap, but there were still some pretty visible edge artifacts.
- In part B, I feather my masks to be most intense at the center and dissipate toward the edges (calculated by the furthest edge). This resulted in a much smoother blend and removed harsh seams.
+  <p>In part A, I was running out of time, so I implemented a naive masking system to blend my images. I simply blended the edges at the overlap, but there were still some pretty visible edge artifacts. In part B, I feather my masks to be most intense at the center and dissipate toward the edges (calculated by the furthest edge). This resulted in a much smoother blend and removed harsh seams.</p>
 
-</p>
+  <div class="math-block">
+    <p><strong>Distance-Based Alpha Feathering:</strong></p>
+    <p>\[\alpha(x, y) = \frac{d(x, y)}{d(x, y) + d'(x, y)}\]</p>
+    <p>where \(d(x, y)\) is distance to nearest edge in image 1</p>
+    <p>and \(d'(x, y)\) is distance to nearest edge in image 2</p>
+  </div>
+
   <img src="./data/A_mosaic.jpeg" alt="A Hand Mosaic">
   <img src="./data/A_auto_mosaic.jpeg" alt="A Auto Mosaic">
   <img src="./data/B_mosaic.jpeg" alt="B Hand Mosaic">
@@ -133,5 +316,6 @@
   <img src="./data/C_auto_mosaic.jpeg" alt="C Auto Mosaic">
 </div>
 
+</div>
 </body>
 </html>
