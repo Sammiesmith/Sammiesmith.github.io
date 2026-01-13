@@ -1,4 +1,4 @@
 # Sammiesmith.github.io
-Cs180 Computer Vision - Project 0
+Projects from CS180 Intro to Computer Vision and Computational Photography at UC Berkeley (Fall 2025)
 
-see website portfolio here: https://sammiesmith.github.io/
+See website portfolio here: https://sammiesmith.github.io/
